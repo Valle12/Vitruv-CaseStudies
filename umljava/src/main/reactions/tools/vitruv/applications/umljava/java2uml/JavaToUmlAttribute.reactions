@@ -10,11 +10,13 @@ execute actions in uml
 
 import routines javaToUmlTypePropagation using qualified names
 
+@feature(type = "AttributeCreation")
 reaction JavaAttributeCreatedInClass {
 	after element java::Field inserted in java::Class[members]
 	call createOrFindUmlAttributeInClass(affectedEObject, newValue)
 }
 
+@feature(type = "AttributeCreation")
 reaction JavaAttributeCreatedInEnum {
 	after element java::Field inserted in java::Enumeration[members]
 	call createOrFindUmlAttributeInEnum(affectedEObject, newValue)
@@ -90,6 +92,7 @@ routine createUmlAttributeInClass(java::Class jClass, java::Field jAttr) {
 	}
 }
 
+@feature(type = "AttributeType")
 reaction JavaAttributeTypeChanged {
 	after element java::TypeReference replaced at java::Field[typeReference]
 	call {
@@ -106,11 +109,13 @@ routine changeUmlAttributeType(java::Field jAttr, java::TypeReference jType) {
 	}
 }
 
+@feature(type = "AttributeModifiers")
 reaction JavaAttributeMadeFinal {
 	after element java::Final inserted in java::Field[annotationsAndModifiers]
 	call setUmlAttributeFinal(affectedEObject, true)
 }
 
+@feature(type = "AttributeModifiers")
 reaction JavaAttributeMadeNonFinal {
 	after element java::Final removed from java::Field[annotationsAndModifiers]
 	call setUmlAttributeFinal(affectedEObject, false)
@@ -128,6 +133,7 @@ routine setUmlAttributeFinal(java::Field jAttr, Boolean isFinal) {
 //===========================================
 //=========================================== Unsupported
 //===========================================
+@feature(type = "InterfaceConstraints")
 reaction JavaAttributeCreatedInInterface {
 	after element java::Field inserted in java::Interface[members]
 	call showMessage(userInteractor,

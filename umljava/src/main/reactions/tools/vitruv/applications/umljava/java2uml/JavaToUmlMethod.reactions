@@ -23,6 +23,7 @@ import routines javaToUmlTypePropagation using qualified names
 //===========================================
 //=========================================== Method
 //===========================================
+@feature(type = "MethodCreation")
 reaction JavaClassMethodCreated {
 	after element java::ClassMethod inserted in java::ConcreteClassifier[members]
 	with (affectedEObject instanceof Class) || (affectedEObject instanceof Enumeration)
@@ -66,6 +67,7 @@ routine createUmlClassMethod(java::ClassMethod jMethod, uml::Classifier uClassif
 	}
 }
 
+@feature(type = "MethodCreation")
 reaction JavaInterfaceMethodCreated {
 	after element java::InterfaceMethod inserted in java::Interface[members]
 	call {
@@ -113,6 +115,7 @@ routine addUmlMethodCorrespondence(uml::Operation uOperation, java::Member jMeth
 	}
 }
 
+@feature(type = "MethodCreation")
 reaction JavaConstructorCreated {
 	after element java::Constructor inserted in java::ConcreteClassifier[members]
 	call {
@@ -157,6 +160,7 @@ routine insertUmlMethod(java::Member javaMethod, java::ConcreteClassifier javaCl
 	}
 }
 
+@feature(type = "MethodDeletion")
 reaction JavaMemberDeleted {
 	after element java::Member deleted
 	call {
@@ -185,6 +189,7 @@ routine deleteAccessorCorrespondence(java::Member jMember, String tag) {
 	}
 }
 
+@feature(type = "MethodModifiers")
 reaction JavaMethodMadeAbstract {
 	after element java::Abstract inserted in java::ClassMethod[annotationsAndModifiers]
 	call {
@@ -192,6 +197,7 @@ reaction JavaMethodMadeAbstract {
 	}
 }
 
+@feature(type = "MethodModifiers")
 reaction JavaMethodMadeNonAbstract {
 	after element java::Abstract removed from java::ClassMethod[annotationsAndModifiers]
 	call setUmlMethodAbstract(affectedEObject, false)
@@ -206,11 +212,13 @@ routine setUmlMethodAbstract(java::ClassMethod jMeth, Boolean isAbstract) {
 	}
 }
 
+@feature(type = "MethodModifiers")
 reaction JavaMethodMadeFinal {
 	after element java::Final inserted in java::ClassMethod[annotationsAndModifiers]
 	call setUmlMethodFinal(affectedEObject, true)
 }
 
+@feature(type = "MethodModifiers")
 reaction JavaMethodMadeNonFinal {
 	after element java::Final removed from java::ClassMethod[annotationsAndModifiers]
 	call setUmlMethodFinal(affectedEObject, false)
@@ -225,11 +233,13 @@ routine setUmlMethodFinal(java::Method jMethod, Boolean isFinal) {
 	}
 }
 
+@feature(type = "MethodModifiers")
 reaction JavaElementMadeStatic {
 	after element java::Static inserted in java::AnnotableAndModifiable[annotationsAndModifiers]
 	call setUmlFeatureStatic(affectedEObject, true)
 }
 
+@feature(type = "MethodModifiers")
 reaction JavaMethodMadeNonStatic {
 	after element java::Static removed from java::AnnotableAndModifiable[annotationsAndModifiers]
 	call setUmlFeatureStatic(affectedEObject, false)
@@ -248,6 +258,7 @@ routine setUmlFeatureStatic(java::AnnotableAndModifiable jElem, Boolean isStatic
 //===========================================
 //=========================================== Parameter
 //===========================================
+@feature(type = "ParameterMapping")
 reaction JavaVariableLengthParameterCreated {
 	after element java::VariableLengthParameter inserted in java::Parametrizable[parameters]
 	call {
@@ -256,6 +267,7 @@ reaction JavaVariableLengthParameterCreated {
 	}
 }
 
+@feature(type = "ParameterMapping")
 reaction JavaOrdinaryParameterCreated {
 	after element java::OrdinaryParameter inserted in java::Parametrizable[parameters]
 	call createUmlParameter(affectedEObject, newValue)
@@ -288,6 +300,7 @@ routine setMultiplicityOfCorrespondingParameterToUnlimited(java::Parameter param
 	}
 }
 
+@feature(type = "ParameterMapping")
 reaction JavaParameterDeleted {
 	after element java::Parameter removed from java::Parametrizable[parameters]
 	call deleteJavaParameter(oldValue)
@@ -303,6 +316,7 @@ routine deleteJavaParameter(java::Parameter jParam) {
 	}
 }
 
+@feature(type = "ParameterMapping")
 reaction JavaParameterTypeChanged {
 	after element java::TypeReference replaced at java::Parameter[typeReference]
 	call changeUmlParameterType(affectedEObject, newValue)
@@ -317,6 +331,7 @@ routine changeUmlParameterType(java::Parameter jParam, java::TypeReference jType
 	}
 }
 
+@feature(type = "ReturnType")
 reaction JavaReturnTypeChanged {
 	after element java::TypeReference replaced at java::Method[typeReference]
 	call changeUmlReturnType(affectedEObject, newValue)
@@ -340,12 +355,14 @@ routine changeUmlReturnType(java::Method jMeth, java::TypeReference jType) {
 //===========================================
 //=========================================== General
 //=========================================== 
+@feature(type = "Visibility")
 reaction JavaVisibilityModifierInserted {
 	after element java::Modifier inserted in java::AnnotableAndModifiable[annotationsAndModifiers]
 	with newValue instanceof Public || newValue instanceof Private || newValue instanceof Protected
 	call changeUmlNamedElementVisibility(affectedEObject)
 }
 
+@feature(type = "Visibility")
 reaction JavaVisibilityModifierRemoved {
 	after element java::Modifier removed from java::AnnotableAndModifiable[annotationsAndModifiers]
 	with oldValue instanceof Private || oldValue instanceof Public || oldValue instanceof Protected
@@ -361,6 +378,7 @@ routine changeUmlNamedElementVisibility(java::AnnotableAndModifiable jElem) {
 	}
 }
 
+@feature(type = "Naming")
 reaction JavaNamedElementRenamed {
 	after attribute replaced at java::NamedElement[name]
 	with !(affectedEObject instanceof CompilationUnit)
@@ -380,12 +398,14 @@ routine renameUmlNamedElement(java::NamedElement jElement) {
 //=========================================== Unsupported
 //===========================================
 //An interface can theoretically have static, non-abstract methods
+@feature(type = "InterfaceConstraints")
 reaction JavaClassMethodCreatedInInterface {
 	after element java::ClassMethod inserted in java::Interface[members]
 	call showMessage(userInteractor,
 		"ClassMethods are currently not supported in Interfaces. Please delete " + newValue)
 }
 
+@feature(type = "ParameterConstraints")
 reaction JavaParameterMadeFinal {
 	after element java::Final inserted in java::Parameter[annotationsAndModifiers]
 	call showMessage(userInteractor,

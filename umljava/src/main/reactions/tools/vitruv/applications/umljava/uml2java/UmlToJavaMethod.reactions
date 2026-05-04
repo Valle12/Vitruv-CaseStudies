@@ -27,6 +27,7 @@ import routines umlToJavaTypePropagation using qualified names
 //===========================================
 //We can not define one single reaction for attribute creation in enums and classes because
 //they don't share a common superclass for "having ownedOperations"
+@feature(type = "MethodCreation")
 reaction UmlOperationInsertedInClass {
 	after element uml::Operation inserted in uml::Class[ownedOperation]
 	call {
@@ -36,6 +37,7 @@ reaction UmlOperationInsertedInClass {
 	}
 }
 
+@feature(type = "MethodCreation")
 reaction UmlOperationInsertedInDataType {
 	after element uml::Operation inserted in uml::DataType[ownedOperation]
 	call {
@@ -45,6 +47,7 @@ reaction UmlOperationInsertedInDataType {
 	}
 }
 
+@feature(type = "MethodCreation")
 reaction UmlMethodInsertedInInterface {
 	after element uml::Operation inserted in uml::Interface[ownedOperation]
 	call {
@@ -154,6 +157,7 @@ routine insertJavaMethod(uml::Operation umlOperation, uml::Classifier umlClassif
 	}
 }
 
+@feature(type = "MethodDeletion")
 reaction UmlMethodDeleted {
 	after element uml::Operation deleted
 	call deleteJavaMethod(affectedEObject)
@@ -170,6 +174,7 @@ routine deleteJavaMethod(uml::Operation umlOperation) {
 	}
 }
 
+@feature(type = "ReturnType")
 reaction UmlMethodReturnTypeChanged {
 	after element uml::Type replaced at uml::Parameter[type]
 	with affectedEObject.direction == ParameterDirectionKind.RETURN_LITERAL
@@ -191,6 +196,7 @@ routine setJavaMethodReturnType(uml::Operation uOperation, uml::Parameter uParam
 	}
 }
 
+@feature(type = "MethodModifiers")
 reaction UmlOperationMadeStatic {
 	after attribute replaced at uml::Operation[isStatic]
 	call setStatic(affectedEObject)
@@ -205,6 +211,7 @@ routine setStatic(uml::Operation uFeat) {
 	}
 }
 
+@feature(type = "MethodModifiers")
 reaction UmlMethodMadeAbstract {
 	after attribute replaced at uml::Operation[isAbstract]
 	call setJavaMethodAbstract(affectedEObject)
@@ -220,6 +227,7 @@ routine setJavaMethodAbstract(uml::Operation uOperation) {
 	}
 }
 
+@feature(type = "MethodModifiers")
 reaction UmlMethodMadeFinal {
 	after attribute replaced at uml::Operation[isLeaf]
 	with !(affectedEObject.class_ instanceof Interface)
@@ -238,6 +246,7 @@ routine setJavaMethodFinal(uml::Operation uOperation, Boolean isFinal) {
 //===========================================
 //=========================================== NamedElement
 //===========================================
+@feature(type = "Visibility")
 reaction UmlElementVisibilityChanged {
 	after attribute replaced at uml::NamedElement[visibility]
 	with !(affectedEObject.eContainer instanceof Interface)
@@ -253,6 +262,7 @@ routine changeJavaElementVisibility(uml::NamedElement uElem) {
 	}
 }
 
+@feature(type = "Naming")
 reaction UmlNamedElementRenamed {
 	after attribute replaced at uml::NamedElement[name]
 	with !(affectedEObject instanceof Classifier) && !(affectedEObject instanceof Property) &&
@@ -272,6 +282,7 @@ routine renameJavaNamedElement(uml::NamedElement uElem, String name) {
 //===========================================
 //=========================================== Parameter
 //===========================================
+@feature(type = "ParameterMapping")
 reaction UmlParameterRenamed {
 	after attribute replaced at uml::Parameter[name]
 	with affectedEObject.direction == ParameterDirectionKind.IN_LITERAL
@@ -287,6 +298,7 @@ routine createMissingJavaParameter(uml::Parameter uParameter) {
 	}
 }
 
+@feature(type = "ParameterMapping")
 reaction UmlParameterCreated {
 	after element uml::Parameter inserted in uml::Operation[ownedParameter]
 	with newValue.direction == ParameterDirectionKind.IN_LITERAL && newValue.name !== null
@@ -313,12 +325,14 @@ routine createJavaParameter(uml::Operation uMeth, uml::Parameter umlParam) {
 	}
 }
 
+@feature(type = "ReturnType")
 reaction UmlReturnParameterDeleted {
 	after element uml::Parameter removed from uml::Operation[ownedParameter]
 	with oldValue.direction == ParameterDirectionKind.RETURN_LITERAL
 	call setJavaMethodReturnType(affectedEObject, affectedEObject.getReturnResult)
 }
 
+@feature(type = "ParameterMapping")
 reaction UmlParameterDeleted {
 	after element uml::Parameter removed from uml::Operation[ownedParameter]
 	with oldValue.direction == ParameterDirectionKind.IN_LITERAL
@@ -335,6 +349,7 @@ routine deleteJavaParameter(uml::Parameter uParam) {
 	}
 }
 
+@feature(type = "ParameterMapping")
 reaction UmlParameterTypeChanged {
 	after element uml::Type replaced at uml::Parameter[type]
 	with affectedEObject.direction == ParameterDirectionKind.IN_LITERAL
@@ -351,22 +366,26 @@ routine changeJavaParameterType(uml::Parameter uParam, uml::Type uType) {
 	}
 }
 
+@feature(type = "Multiplicity")
 reaction RegularOrReturnParameterLowerChanged {
 	after element replaced at uml::Parameter[lowerValue]
 	call adaptParameterBoundChanged(affectedEObject.operation, affectedEObject)
 }
 
+@feature(type = "Multiplicity")
 reaction RegularOrReturnParameterUpperChanged {
 	after element replaced at uml::Parameter[upperValue]
 	call adaptParameterBoundChanged(affectedEObject.operation, affectedEObject)
 }
 
+@feature(type = "Multiplicity")
 reaction RegularOrReturnParameterIntegerBoundChanged {
 	after attribute replaced at uml::LiteralInteger[value]
 	with affectedEObject.owner instanceof Parameter && affectedEObject.value == newValue
 	call adaptParameterBoundChanged((affectedEObject.owner as Parameter).operation, affectedEObject.owner as Parameter)
 }
 
+@feature(type = "Multiplicity")
 reaction RegularOrReturnParameterUnlimitedBoundChanged {
 	after attribute replaced at uml::LiteralUnlimitedNatural[value]
 	with affectedEObject.owner instanceof Parameter && affectedEObject.value == newValue
@@ -383,12 +402,14 @@ routine adaptParameterBoundChanged(uml::Operation uOperation, uml::Parameter uPa
 	}
 }
 
+@feature(type = "ParameterDirection")
 reaction UmlParameterDirectionChangedFromIn {
 	after attribute replaced at uml::Parameter[direction]
 	with oldValue == ParameterDirectionKind.IN_LITERAL
 	call deleteJavaParameter(affectedEObject)
 }
 
+@feature(type = "ParameterDirection")
 reaction UmlParameterDirectionChangedFromReturn {
 	after attribute replaced at uml::Parameter[direction]
 	with oldValue == ParameterDirectionKind.RETURN_LITERAL
@@ -404,12 +425,14 @@ routine adaptParameterDirectionChangedFromReturn(uml::Operation uOperation) {
 	}
 }
 
+@feature(type = "ParameterDirection")
 reaction UmlParameterDirectionChangedToIn {
 	after attribute replaced at uml::Parameter[direction]
 	with newValue == ParameterDirectionKind.IN_LITERAL
 	call createJavaParameter(affectedEObject.operation, affectedEObject)
 }
 
+@feature(type = "ParameterDirection")
 reaction UmlParameterDirectionChangedToReturn {
 	after attribute replaced at uml::Parameter[direction]
 	with newValue == ParameterDirectionKind.RETURN_LITERAL
@@ -430,12 +453,14 @@ routine adaptParameterDirectionChangedToReturn(uml::Operation uOperation, uml::P
 //===========================================
 //=========================================== Unsupported
 //===========================================
+@feature(type = "ParameterDirection")
 reaction UmlParameterDirectionKindChangedInvalid {
 	after attribute replaced at uml::Parameter[direction]
 	with (newValue !== ParameterDirectionKind.RETURN_LITERAL) && (newValue !== ParameterDirectionKind.IN_LITERAL)
 	call showMessage(userInteractor, "The ParameterDirectionKind " + newValue + " is not supported")
 }
 
+@feature(type = "InterfaceConstraints")
 reaction UmlInterfaceMethodVisibilityChanged {
 	after attribute replaced at uml::Operation[visibility]
 	with (affectedEObject.eContainer instanceof Interface) && newValue != VisibilityKind.PUBLIC_LITERAL
@@ -443,6 +468,7 @@ reaction UmlInterfaceMethodVisibilityChanged {
 		"Non-public operations in interface are not valid. Please set " + affectedEObject + " to public")
 }
 
+@feature(type = "InterfaceConstraints")
 reaction UmlInterfaceMethodMadeFinal {
 	after attribute replaced at uml::Operation[isLeaf]
 	with affectedEObject.class_ instanceof Interface

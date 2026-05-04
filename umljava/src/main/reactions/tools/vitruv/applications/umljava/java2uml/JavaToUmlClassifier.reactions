@@ -103,11 +103,13 @@ routine registerPredefinedUmlPrimitiveTypes(EObject alreadyPersistedEObject) {
 //===========================================
 //=========================================== CompilationUnit
 //===========================================
+@feature(type = "ModelMapping")
 reaction JavaCompilationUnitInsertedAsRoot {
 	after element java::CompilationUnit inserted as root
 	call newValue.classifiers.forEach[insertUmlClassifier(it, newValue)]
 }
 
+@feature(type = "ModelMapping")
 reaction JavaCompilationUnitInsertedInPackage {
 	after element java::CompilationUnit inserted in java::Package[compilationUnits]
 	call {
@@ -158,11 +160,13 @@ routine addUmlElementToPackage(uml::PackageableElement uPackageable, uml::Packag
 	}
 }
 
+@feature(type = "ClassDeletion")
 reaction JavaCompUnitDeleted {
 	after element java::CompilationUnit deleted
 	call affectedEObject.classifiers.forEach[deleteUmlClassifier(it)]
 }
 
+@feature(type = "ClassDeletion")
 reaction JavaClassifierDeleted {
 	after element java::ConcreteClassifier deleted
 	call deleteUmlClassifier(affectedEObject)
@@ -178,6 +182,7 @@ routine deleteUmlClassifier(java::ConcreteClassifier javaClassifier) {
 	}
 }
 
+@feature(type = "ClassDeletion")
 reaction JavaClassifierRemoved {
 	after element java::ConcreteClassifier removed from java::CompilationUnit[classifiers]
 	call cleanUpJavaCompilationUnit(affectedEObject)
@@ -192,6 +197,7 @@ routine cleanUpJavaCompilationUnit(java::CompilationUnit jCompUnit) {
 //===========================================
 //=========================================== Class
 //===========================================
+@feature(type = "ClassCreation")
 reaction JavaClassInserted {
 	after element java::Class inserted in java::CompilationUnit[classifiers]
 	call {
@@ -228,11 +234,13 @@ routine createUmlClass(java::Class jClass, java::CompilationUnit jCompUnit) {
 	}
 }
 
+@feature(type = "ClassModifiers")
 reaction JavaClassMadeAbstract {
 	after element java::Abstract inserted in java::Class[annotationsAndModifiers]
 	call setUmlClassAbstract(affectedEObject, true)
 }
 
+@feature(type = "ClassModifiers")
 reaction JavaClassMadeNonAbstract {
 	after element java::Abstract removed from java::Class[annotationsAndModifiers]
 	call setUmlClassAbstract(affectedEObject, false)
@@ -247,11 +255,13 @@ routine setUmlClassAbstract(java::Class jClass, Boolean isAbstract) {
 	}
 }
 
+@feature(type = "ClassModifiers")
 reaction JavaClassMadeFinal {
 	after element java::Final inserted in java::Class[annotationsAndModifiers]
 	call setUmlClassFinal(affectedEObject, true)
 }
 
+@feature(type = "ClassModifiers")
 reaction JavaClassMadeNonFinal {
 	after element java::Final removed from java::Class[annotationsAndModifiers]
 	call setUmlClassFinal(affectedEObject, false)
@@ -266,6 +276,7 @@ routine setUmlClassFinal(java::Class jClass, Boolean isFinal) {
 	}
 }
 
+@feature(type = "Inheritance")
 reaction JavaSuperClassChanged {
 	after element java::TypeReference replaced at java::Class[^extends]
 	call {
@@ -305,6 +316,7 @@ routine deleteUmlSuperClassGeneralization(java::TypeReference jReference) {
 	}
 }
 
+@feature(type = "InterfaceRealization")
 reaction JavaClassImplementAdded {
 	after element java::TypeReference inserted in java::Class[implements]
 	call {
@@ -344,6 +356,7 @@ routine addImplementsCorrespondence(java::TypeReference jReference, uml::Interfa
 	}
 }
 
+@feature(type = "InterfaceRealization")
 reaction JavaClassImplementRemoved {
 	after element java::TypeReference removed from java::Class[implements]
 	call removeUmlClassImplement(affectedEObject, oldValue)
@@ -364,6 +377,7 @@ routine removeUmlClassImplement(java::Class jClass, java::TypeReference jReferen
 //===========================================
 //=========================================== Interface
 //===========================================
+@feature(type = "InterfaceCreation")
 reaction JavaInterfaceCreated {
 	after element java::Interface inserted in java::CompilationUnit[classifiers]
 	call {
@@ -399,6 +413,7 @@ routine createUmlInterface(java::Interface jInterface, java::CompilationUnit jCo
 	}
 }
 
+@feature(type = "Inheritance")
 reaction JavaSuperInterfaceAdded {
 	after element java::TypeReference inserted in java::Interface[^extends]
 	call {
@@ -436,6 +451,7 @@ routine addGeneralizationCorrespondence(uml::Generalization uGeneralization, jav
 	}
 }
 
+@feature(type = "Inheritance")
 reaction JavaSuperInterfaceRemoved {
 	after element java::TypeReference removed from java::Interface[^extends]
 	call removeUmlSuperInterface(affectedEObject, oldValue)
@@ -455,6 +471,7 @@ routine removeUmlSuperInterface(java::Interface jInterface, java::TypeReference 
 //===========================================
 //=========================================== Enum
 //===========================================
+@feature(type = "EnumCreation")
 reaction JavaEnumCreated {
 	after element java::Enumeration inserted in java::CompilationUnit[classifiers]
 	call {
@@ -493,6 +510,7 @@ routine createUmlEnum(java::Enumeration jEnum, java::CompilationUnit jCompUnit) 
 	}
 }
 
+@feature(type = "EnumCreation")
 reaction JavaEnumConstantCreated {
 	after element java::EnumConstant inserted in java::Enumeration[constants]
 	call createUmlEnumLiteral(affectedEObject, newValue)
@@ -513,6 +531,7 @@ routine createUmlEnumLiteral(java::Enumeration jEnum, java::EnumConstant jConsta
 	}
 }
 
+@feature(type = "EnumCreation")
 reaction JavaEnumConstantDeleted {
 	after element java::EnumConstant removed from java::Enumeration[constants]
 	call deleteUmlEnumLiteral(oldValue)
@@ -528,6 +547,7 @@ routine deleteUmlEnumLiteral(java::EnumConstant jConstant) {
 	}
 }
 
+@feature(type = "Naming")
 reaction JavaEnumConstantRenamed {
 	after attribute replaced at java::EnumConstant[name]
 	call renameUmlEnumLiteral(affectedEObject)
@@ -545,6 +565,7 @@ routine renameUmlEnumLiteral(java::EnumConstant jConstant) {
 //===========================================
 //=========================================== Package
 //===========================================
+@feature(type = "PackageMapping")
 reaction JavaPackageInserted {
 	after element java::Package inserted as root
 	call {
@@ -629,6 +650,7 @@ routine createUmlPackage(java::Package jPackage, uml::Model uModel) {
 	}
 }
 
+@feature(type = "PackageMapping")
 reaction JavaPackageDeleted {
 	after element java::Package deleted
 	call deleteCorrespondingUmlPackage(affectedEObject)
@@ -654,12 +676,14 @@ routine deleteUmlPackage(uml::Package umlPackage) {
 //===========================================
 //=========================================== Unsupported
 //===========================================
+@feature(type = "EnumConstraints")
 reaction JavaEnumerationImplementAdded {
 	after element java::TypeReference inserted in java::Enumeration[implements]
 	call showMessage(userInteractor,
 		"Implement relations from enums are not supported. Please remove it from " + affectedEObject)
 }
 
+@feature(type = "ClassConstraints")
 reaction JavaClassifierMadeStatic {
 	after element java::Static inserted in java::ConcreteClassifier[annotationsAndModifiers]
 	call showMessage(userInteractor,

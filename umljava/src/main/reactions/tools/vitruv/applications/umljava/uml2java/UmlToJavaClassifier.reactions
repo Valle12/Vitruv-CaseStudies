@@ -28,6 +28,7 @@ execute actions in java
 //===========================================
 //=========================================== Class
 //===========================================
+@feature(type = "ClassCreation")
 reaction UmlClassInserted {
 	after element uml::Class inserted in uml::Package[packagedElement]
 	call {
@@ -109,6 +110,7 @@ routine insertJavaClassifier(uml::Classifier umlClassifier, uml::Package umlPack
 	}
 }
 
+@feature(type = "Naming")
 reaction UmlClassifierRenamed {
 	after attribute replaced at uml::Classifier[name]
 	call renameJavaClassifier(affectedEObject)
@@ -126,6 +128,7 @@ routine renameJavaClassifier(uml::Classifier umlClassifier) {
 	}
 }
 
+@feature(type = "ClassDeletion")
 reaction UmlClassifierDeleted {
 	after element uml::Classifier deleted
 	call deleteJavaClass(affectedEObject)
@@ -141,6 +144,7 @@ routine deleteJavaClass(uml::Classifier umlClassifier) {
 	}
 }
 
+@feature(type = "ClassModifiers")
 reaction UmlClassMadeFinal {
 	after attribute replaced at uml::Class[isFinalSpecialization]
 	call setJavaClassFinal(affectedEObject)
@@ -155,6 +159,7 @@ routine setJavaClassFinal(uml::Class umlClass) {
 	}
 }
 
+@feature(type = "ClassModifiers")
 reaction UmlClassMadeAbstract {
 	after attribute replaced at uml::Class[isAbstract]
 	call setJavaClassAbstract(affectedEObject)
@@ -169,6 +174,7 @@ routine setJavaClassAbstract(uml::Class umlClass) {
 	}
 }
 
+@feature(type = "Inheritance")
 reaction UmlSuperClassAdded {
 	after element uml::Generalization inserted in uml::Class[generalization]
 	call addJavaSuperClass(affectedEObject, newValue)
@@ -196,6 +202,7 @@ routine addJavaSuperClass(uml::Class uClass, uml::Generalization uGeneralization
 	}
 }
 
+@feature(type = "Inheritance")
 reaction UmlSuperClassDeleted {
 	after element uml::Generalization removed from uml::Class[generalization]
 	call deleteJavaSuperClass(oldValue)
@@ -211,6 +218,7 @@ routine deleteJavaSuperClass(uml::Generalization uGeneralization) {
 	}
 }
 
+@feature(type = "Inheritance")
 reaction UmlSuperClassReplaced {
 	after element uml::Class replaced at uml::Generalization[general]
 	with {
@@ -226,6 +234,7 @@ reaction UmlSuperClassReplaced {
 	}
 }
 
+@feature(type = "InterfaceRealization")
 reaction UmlInterfaceRealizationCreated {
 	after element uml::InterfaceRealization inserted in uml::Class[interfaceRealization]
 	call createJavaClassImplementsReference(newValue, affectedEObject)
@@ -262,6 +271,7 @@ routine addImplementsCorrespondence(uml::InterfaceRealization uRealization, java
 	}
 }
 
+@feature(type = "InterfaceRealization")
 reaction UmlInterfaceRealizationRemoved {
 	after element uml::InterfaceRealization removed from uml::Class[interfaceRealization]
 	call deleteJavaClassImplementsReference(oldValue, affectedEObject)
@@ -279,6 +289,7 @@ routine deleteJavaClassImplementsReference(uml::InterfaceRealization uRealizatio
 	}
 }
 
+@feature(type = "InterfaceRealization")
 reaction UmlInterfaceRealizationReplaced {
 	after element replaced at uml::InterfaceRealization[contract]
 	with affectedEObject.implementingClassifier !== null && affectedEObject.implementingClassifier instanceof Class
@@ -292,6 +303,7 @@ reaction UmlInterfaceRealizationReplaced {
 	}
 }
 
+@feature(type = "DataTypeCreation")
 reaction UmlDataTypeInserted {
 	after element uml::DataType inserted in uml::Package[packagedElement]
 	with !(newValue instanceof PrimitiveType) && !(newValue instanceof Enumeration)
@@ -304,6 +316,7 @@ reaction UmlDataTypeInserted {
 //===========================================
 //=========================================== Interface
 //===========================================
+@feature(type = "InterfaceCreation")
 reaction UmlInterfaceInserted {
 	after element uml::Interface inserted in uml::Package[packagedElement]
 	call {
@@ -353,6 +366,7 @@ routine createJavaInterface(uml::Interface umlInterface) {
 	}
 }
 
+@feature(type = "Inheritance")
 reaction UmlSuperInterfaceAdded {
 	after element uml::Generalization inserted in uml::Interface[generalization]
 	call addJavaSuperInterface(affectedEObject, newValue)
@@ -383,6 +397,7 @@ routine addGeneralizationCorrespondence(uml::Generalization uGeneralization, jav
 	}
 }
 
+@feature(type = "Inheritance")
 reaction UmlSuperInterfaceDeleted {
 	after element uml::Generalization removed from uml::Interface[generalization]
 	call deleteJavaSuperInterface(oldValue)
@@ -398,6 +413,7 @@ routine deleteJavaSuperInterface(uml::Generalization uGeneralization) {
 	}
 }
 
+@feature(type = "Inheritance")
 reaction UmlSuperInterfaceReplaced {
 	after element uml::Interface replaced at uml::Generalization[general]
 	call {
@@ -411,6 +427,7 @@ reaction UmlSuperInterfaceReplaced {
 //===========================================
 //=========================================== Enum
 //===========================================
+@feature(type = "EnumCreation")
 reaction UmlEnumInserted {
 	after element uml::Enumeration inserted in uml::Package[packagedElement]
 	call {
@@ -434,6 +451,7 @@ routine createJavaEnum(uml::Enumeration uEnum) {
 	}
 }
 
+@feature(type = "EnumCreation")
 reaction UmlEnumLiteralInserted {
 	after element uml::EnumerationLiteral inserted in uml::Enumeration[ownedLiteral]
 	call createJavaEnumConstant(newValue, affectedEObject)
@@ -454,6 +472,7 @@ routine createJavaEnumConstant(uml::EnumerationLiteral uLiteral, uml::Enumeratio
 	}
 }
 
+@feature(type = "EnumCreation")
 reaction UmlEnumLiteralRemoved {
 	after element uml::EnumerationLiteral removed from uml::Enumeration[ownedLiteral]
 	call deleteJavaEnumConstant(oldValue)
@@ -472,6 +491,7 @@ routine deleteJavaEnumConstant(uml::EnumerationLiteral uLiteral) {
 //===========================================
 //=========================================== Package
 //===========================================
+@feature(type = "ModelMapping")
 reaction UmlModelCreated {
 	after element uml::Model inserted as root
 	call checkIfUmlModelCorrespondenceExists(newValue)
@@ -487,6 +507,7 @@ routine checkIfUmlModelCorrespondenceExists(uml::Model newModel) {
 	}
 }
 
+@feature(type = "ModelMapping")
 reaction UmlModelRemoved {
 	after element uml::Model removed as root
 	call removeUmlModel(oldValue)
@@ -500,6 +521,7 @@ routine removeUmlModel(uml::Model removedModel) {
 	}
 }
 
+@feature(type = "PackageMapping")
 reaction UmlPackageInserted {
 	after element uml::Package inserted in uml::Package[packagedElement]
 	call {
@@ -543,6 +565,7 @@ routine createJavaPackage(uml::Package uPackage) {
 	}
 }
 
+@feature(type = "Naming")
 reaction UmlPackageRenamed {
 	after attribute replaced at uml::Package[name]
 	with !(affectedEObject instanceof Model)
@@ -578,6 +601,7 @@ routine changePackageOfJavaCompilationUnit(java::Package jPackage, java::Compila
 	}
 }
 
+@feature(type = "PackageMapping")
 reaction UmlPackageDeleted {
 	after element uml::Package deleted
 	call deleteJavaPackage(affectedEObject)
@@ -597,6 +621,7 @@ routine deleteJavaPackage(uml::Package uPackage) {
 	}
 }
 
+@feature(type = "PrimitiveTypeMapping")
 reaction UmlPrimitiveTypeInserted {
 	after element uml::PrimitiveType inserted in uml::Model[packagedElement]
 	call validateSupportedPrimitiveType(newValue)
