@@ -197,7 +197,7 @@ routine cleanUpJavaCompilationUnit(java::CompilationUnit jCompUnit) {
 //===========================================
 //=========================================== Class
 //===========================================
-@feature(type = "ClassCreation")
+@feature(type = "ClassCreation.Class")
 reaction JavaClassInserted {
 	after element java::Class inserted in java::CompilationUnit[classifiers]
 	call {

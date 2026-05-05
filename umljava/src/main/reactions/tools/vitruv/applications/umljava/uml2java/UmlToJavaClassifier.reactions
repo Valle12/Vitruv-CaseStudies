@@ -28,7 +28,7 @@ execute actions in java
 //===========================================
 //=========================================== Class
 //===========================================
-@feature(type = "ClassCreation")
+@feature(type = "ClassCreation.Class")
 reaction UmlClassInserted {
 	after element uml::Class inserted in uml::Package[packagedElement]
 	call {
@@ -303,7 +303,7 @@ reaction UmlInterfaceRealizationReplaced {
 	}
 }
 
-@feature(type = "DataTypeCreation")
+@feature(type = "DataTypeCreation.Class")
 reaction UmlDataTypeInserted {
 	after element uml::DataType inserted in uml::Package[packagedElement]
 	with !(newValue instanceof PrimitiveType) && !(newValue instanceof Enumeration)
