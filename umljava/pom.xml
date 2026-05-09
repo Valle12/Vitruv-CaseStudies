@@ -16,6 +16,10 @@
   <name>Vitruv UML-Java Application</name>
   <description>The UML Java application case study</description>
 
+  <properties>
+    <umljava.reactions.dir>${project.basedir}/src/main/reactions</umljava.reactions.dir>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -30,7 +34,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${project.basedir}/src/main/reactions</source>
+                <source>${umljava.reactions.dir}</source>
                 <source>${project.build.directory}/generated-sources/reactions</source>
               </sources>
             </configuration>
@@ -89,7 +93,6 @@
         <executions>
           <execution>
             <id>compile-xtend</id>
-            <phase />
           </execution>
         </executions>
       </plugin>
