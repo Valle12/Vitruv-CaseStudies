@@ -4,6 +4,7 @@ import org.emftext.language.java.members.Field
 import tools.vitruv.applications.util.temporary.java.UmlJavaCorrespondenceTag
 import static tools.vitruv.applications.util.temporary.java.CommonUtil.showMessage
 import static tools.vitruv.applications.util.temporary.java.JavaMemberAndParameterUtil.*
+import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.rewriteFieldAccessToStaticCall
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.claimNotMany
 import static extension tools.vitruv.applications.util.temporary.java.JavaModifierUtil.*
 
@@ -75,6 +76,52 @@ routine createJavaField(uml::Property umlProperty) {
 		addCorrespondenceBetween(umlProperty, javaField)
 		createOrFindJavaGetter(umlProperty, javaField)
 		createOrFindJavaSetter(umlProperty, javaField)
+	}
+}
+
+@feature(type = "AccessorGeneration")
+reaction UmlPropertyInsertedInClassEnforceAccessorGeneration {
+	after element uml::Property inserted in uml::Class[ownedAttribute]
+	call enforceAccessorGeneration(newValue, affectedEObject)
+}
+
+@feature(type = "AccessorGeneration")
+reaction UmlPropertyInsertedInDataTypeEnforceAccessorGeneration {
+	after element uml::Property inserted in uml::DataType[ownedAttribute]
+	call enforceAccessorGeneration(newValue, affectedEObject)
+}
+
+routine enforceAccessorGeneration(uml::Property umlProperty, uml::Classifier umlClassifier) {
+	match {
+		val javaField = retrieve java::Field corresponding to umlProperty
+		val javaClassifier = retrieve java::ConcreteClassifier corresponding to umlClassifier
+	}
+	update {
+		javaField.makePrivate
+		createOrFindJavaGetter(umlProperty, javaField)
+		createOrFindJavaSetter(umlProperty, javaField)
+		insertAccessorsIntoClassifier(umlProperty, javaClassifier)
+	}
+}
+
+routine insertAccessorsIntoClassifier(uml::Property umlProperty, java::ConcreteClassifier javaClassifier) {
+	match {
+		val javaGetter = retrieve optional java::ClassMethod corresponding to umlProperty tagged UmlJavaCorrespondenceTag.
+			GETTER
+		val javaSetter = retrieve optional java::ClassMethod corresponding to umlProperty tagged UmlJavaCorrespondenceTag.
+			SETTER
+	}
+	update {
+		javaGetter.ifPresent [
+			if (!javaClassifier.members.contains(it)) {
+				javaClassifier.members += it
+			}
+		]
+		javaSetter.ifPresent [
+			if (!javaClassifier.members.contains(it)) {
+				javaClassifier.members += it
+			}
+		]
 	}
 }
 
@@ -159,7 +206,27 @@ routine setStatic(uml::Property umlAttr) {
 	}
 	update {
 		jAttr.static = umlAttr.isStatic
-	// TODO: updating the static property of a java field requires an update of its corresponding accessors
+	}
+}
+
+@feature(type = "AttributeStaticCall")
+reaction UmlAttributeMadeStaticRewriteCallSites {
+	after attribute replaced at uml::Property[isStatic]
+	call rewriteAttributeAccessAsStatic(affectedEObject)
+}
+
+routine rewriteAttributeAccessAsStatic(uml::Property umlAttr) {
+	match {
+		val jField = retrieve java::Field corresponding to umlAttr
+		val jGetter = retrieve optional java::ClassMethod corresponding to umlAttr tagged UmlJavaCorrespondenceTag.GETTER
+		val jSetter = retrieve optional java::ClassMethod corresponding to umlAttr tagged UmlJavaCorrespondenceTag.SETTER
+	}
+	update {
+		jGetter.ifPresent[it.static = umlAttr.isStatic]
+		jSetter.ifPresent[it.static = umlAttr.isStatic]
+		if (umlAttr.isStatic) {
+			rewriteFieldAccessToStaticCall(jField)
+		}
 	}
 }
 

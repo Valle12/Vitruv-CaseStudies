@@ -93,6 +93,7 @@
         <executions>
           <execution>
             <id>compile-xtend</id>
+            <phase />
           </execution>
         </executions>
       </plugin>

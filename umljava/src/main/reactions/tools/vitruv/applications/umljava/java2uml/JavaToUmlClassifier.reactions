@@ -207,6 +207,26 @@ reaction JavaClassInserted {
 	}
 }
 
+@feature(type = "ConstructorCreation")
+reaction JavaClassInsertedAddDefaultConstructor {
+	after element java::Class inserted in java::CompilationUnit[classifiers]
+	call addUmlDefaultConstructor(newValue)
+}
+
+routine addUmlDefaultConstructor(java::Class jClass) {
+	match {
+		val uClass = retrieve uml::Class corresponding to jClass
+		check uClass.ownedOperations.filter[name == jClass.name].isEmpty
+	}
+	create {
+		val uConstructor = new uml::Operation
+	}
+	update {
+		uConstructor.name = jClass.name
+		uClass.ownedOperations += uConstructor
+	}
+}
+
 routine createOrFindUmlClass(java::Class jClass, java::CompilationUnit jCompUnit) {
 	match {
 		val uModel = retrieve uml::Model corresponding to UMLPackage.Literals.MODEL
@@ -231,6 +251,56 @@ routine createUmlClass(java::Class jClass, java::CompilationUnit jCompUnit) {
 		uClass.name = jClass.name
 		uClass.visibility = getUmlVisibilityKindFromJavaElement(jClass)
 		addTypeCorrespondence(jClass, uClass)
+	}
+}
+
+@feature(type = "ClassCreation.Interface")
+reaction JavaClassInsertedAsInterface {
+	after element java::Class inserted in java::CompilationUnit[classifiers]
+	call {
+		rootElementPreSetup(affectedEObject)
+		createUmlInterfaceFromClass(newValue, affectedEObject)
+		insertUmlClassifier(newValue, affectedEObject)
+	}
+}
+
+routine createUmlInterfaceFromClass(java::Class jClass, java::CompilationUnit jCompUnit) {
+	match {
+		require absence of uml::Class corresponding to jClass
+		require absence of uml::Interface corresponding to jClass
+	}
+	create {
+		val uInterface = new uml::Interface
+	}
+	update {
+		uInterface.name = jClass.name
+		uInterface.visibility = getUmlVisibilityKindFromJavaElement(jClass)
+		addTypeCorrespondence(jClass, uInterface)
+	}
+}
+
+@feature(type = "ClassCreation.Enum")
+reaction JavaClassInsertedAsEnum {
+	after element java::Class inserted in java::CompilationUnit[classifiers]
+	call {
+		rootElementPreSetup(affectedEObject)
+		createUmlEnumFromClass(newValue, affectedEObject)
+		insertUmlClassifier(newValue, affectedEObject)
+	}
+}
+
+routine createUmlEnumFromClass(java::Class jClass, java::CompilationUnit jCompUnit) {
+	match {
+		require absence of uml::Class corresponding to jClass
+		require absence of uml::Enumeration corresponding to jClass
+	}
+	create {
+		val uEnum = new uml::Enumeration
+	}
+	update {
+		uEnum.name = jClass.name
+		uEnum.visibility = getUmlVisibilityKindFromJavaElement(jClass)
+		addTypeCorrespondence(jClass, uEnum)
 	}
 }
 
@@ -325,6 +395,21 @@ reaction JavaClassImplementAdded {
 	}
 }
 
+@feature(type = "RealizationSuffix")
+reaction JavaClassImplementAddedAppendSuffix {
+	after element java::TypeReference inserted in java::Class[implements]
+	call addJavaRealizationSuffix(affectedEObject)
+}
+
+routine addJavaRealizationSuffix(java::Class jClass) {
+	match {
+		check !jClass.name.endsWith("Impl")
+	}
+	update {
+		jClass.name = jClass.name + "Impl"
+	}
+}
+
 routine addUmlClassImplement(java::Class jClass, java::TypeReference jReference, java::Interface jInterface) {
 	match {
 		val uClass = retrieve uml::Class corresponding to jClass
@@ -384,6 +469,21 @@ reaction JavaInterfaceCreated {
 		rootElementPreSetup(affectedEObject)
 		createOrFindUmlInterface(newValue, affectedEObject)
 		insertUmlClassifier(newValue, affectedEObject)
+	}
+}
+
+@feature(type = "InterfacePrefix")
+reaction JavaInterfaceCreatedAddPrefix {
+	after element java::Interface inserted in java::CompilationUnit[classifiers]
+	call addJavaInterfacePrefix(newValue)
+}
+
+routine addJavaInterfacePrefix(java::Interface jInterface) {
+	match {
+		check !jInterface.name.startsWith("I")
+	}
+	update {
+		jInterface.name = "I" + jInterface.name
 	}
 }
 

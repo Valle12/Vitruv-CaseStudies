@@ -1,5 +1,8 @@
 import static tools.vitruv.applications.util.temporary.java.CommonUtil.showMessage
+import static tools.vitruv.applications.util.temporary.java.JavaMemberAndParameterUtil.*
+import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.rewriteFieldAccessToStaticCall
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.claimNotMany
+import static extension tools.vitruv.applications.util.temporary.java.JavaModifierUtil.*
 
 import "http://www.eclipse.org/uml2/5.0.0/UML" as uml
 import "http://www.emftext.org/java" as java
@@ -92,6 +95,40 @@ routine createUmlAttributeInClass(java::Class jClass, java::Field jAttr) {
 	}
 }
 
+@feature(type = "AccessorGeneration")
+reaction JavaAttributeCreatedInClassEnforceAccessorGeneration {
+	after element java::Field inserted in java::Class[members]
+	call enforceJavaAccessorGeneration(affectedEObject, newValue)
+}
+
+@feature(type = "AccessorGeneration")
+reaction JavaAttributeCreatedInEnumEnforceAccessorGeneration {
+	after element java::Field inserted in java::Enumeration[members]
+	call enforceJavaAccessorGeneration(affectedEObject, newValue)
+}
+
+routine enforceJavaAccessorGeneration(java::ConcreteClassifier jClassifier, java::Field jField) {
+	update {
+		jField.makePrivate
+		val getterName = buildGetterName(jField.name)
+		val setterName = buildSetterName(jField.name)
+		val existingGetter = jClassifier.members.filter(org.emftext.language.java.members.ClassMethod).filter [
+			name == getterName
+		].claimNotMany
+		if (existingGetter === null) {
+			val getter = createGetterForAttribute(jField)
+			jClassifier.members += getter
+		}
+		val existingSetter = jClassifier.members.filter(org.emftext.language.java.members.ClassMethod).filter [
+			name == setterName
+		].claimNotMany
+		if (existingSetter === null) {
+			val setter = createSetterForAttribute(jField)
+			jClassifier.members += setter
+		}
+	}
+}
+
 @feature(type = "AttributeType")
 reaction JavaAttributeTypeChanged {
 	after element java::TypeReference replaced at java::Field[typeReference]
@@ -106,6 +143,27 @@ routine changeUmlAttributeType(java::Field jAttr, java::TypeReference jType) {
 	}
 	update {
 		javaToUmlTypePropagation.propagateAttributeTypeChange(jAttr, uAttr)
+	}
+}
+
+@feature(type = "AttributeStaticCall")
+reaction JavaAttributeMadeStaticRewriteCallSites {
+	after element java::Static inserted in java::Field[annotationsAndModifiers]
+	call rewriteJavaAttributeAccessAsStatic(affectedEObject)
+}
+
+routine rewriteJavaAttributeAccessAsStatic(java::Field jField) {
+	match {
+		val uAttr = retrieve uml::Property corresponding to jField
+	}
+	update {
+		val getterName = buildGetterName(uAttr.name)
+		val setterName = buildSetterName(uAttr.name)
+		val isGetterName = "is" + uAttr.name.toFirstUpper
+		jField.containingConcreteClassifier.members.filter(org.emftext.language.java.members.ClassMethod).filter [
+			name == getterName || name == setterName || name == isGetterName
+		].forEach[it.static = true]
+		rewriteFieldAccessToStaticCall(jField)
 	}
 }
 

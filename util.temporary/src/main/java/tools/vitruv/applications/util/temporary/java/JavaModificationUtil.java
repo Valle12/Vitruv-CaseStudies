@@ -4,12 +4,17 @@ import com.google.common.collect.Iterables;
 import edu.kit.ipd.sdq.activextendannotations.Utility;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import org.apache.log4j.Logger;
+import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.xbase.lib.Conversions;
 import org.eclipse.xtext.xbase.lib.IterableExtensions;
@@ -33,6 +38,7 @@ import org.emftext.language.java.literals.LiteralsFactory;
 import org.emftext.language.java.members.Constructor;
 import org.emftext.language.java.members.Field;
 import org.emftext.language.java.members.MembersFactory;
+import org.emftext.language.java.members.Method;
 import org.emftext.language.java.modifiers.AnnotableAndModifiable;
 import org.emftext.language.java.modifiers.ModifiersFactory;
 import org.emftext.language.java.operators.OperatorsFactory;
@@ -40,6 +46,7 @@ import org.emftext.language.java.parameters.OrdinaryParameter;
 import org.emftext.language.java.parameters.Parameter;
 import org.emftext.language.java.parameters.ParametersFactory;
 import org.emftext.language.java.references.IdentifierReference;
+import org.emftext.language.java.references.MethodCall;
 import org.emftext.language.java.references.Reference;
 import org.emftext.language.java.references.ReferenceableElement;
 import org.emftext.language.java.references.ReferencesFactory;
@@ -584,6 +591,125 @@ public final class JavaModificationUtil {
             return getWrapperTypeReferenceForPrimitiveType((PrimitiveType) type);
         } else {
             throw new IllegalArgumentException("Unhandled parameter types: " + Arrays.asList(type).toString());
+        }
+    }
+
+    /**
+     * Rewrites all references to {@code field} from instance access (e.g. {@code foo.bar} or
+     * {@code this.bar}) to qualified static access (e.g. {@code Foo.bar}) by changing the
+     * preceding receiver in the reference chain to the field's containing classifier.
+     */
+    public static void rewriteFieldAccessToStaticCall(final Field field) {
+        ConcreteClassifier owner = field.getContainingConcreteClassifier();
+        if (owner == null) {
+            return;
+        }
+        List<IdentifierReference> matches = collectIdentifierReferencesTo(field);
+        for (IdentifierReference ref : matches) {
+            qualifyReceiverWithClassifier(ref, owner);
+        }
+    }
+
+    /**
+     * Rewrites all calls to {@code method} from instance access (e.g. {@code foo.bar()} or
+     * {@code this.bar()}) to qualified static access (e.g. {@code Foo.bar()}) by changing the
+     * preceding receiver in the reference chain to the method's containing classifier.
+     */
+    public static void rewriteMethodCallsToStaticCall(final Method method) {
+        ConcreteClassifier owner = method.getContainingConcreteClassifier();
+        if (owner == null) {
+            return;
+        }
+        List<MethodCall> matches = collectMethodCallsTo(method);
+        for (MethodCall call : matches) {
+            qualifyReceiverWithClassifier(call, owner);
+        }
+    }
+
+    private static List<IdentifierReference> collectIdentifierReferencesTo(final Field field) {
+        List<IdentifierReference> matches = new ArrayList<>();
+        Iterator<EObject> contents = allEObjectContents(field);
+        while (contents.hasNext()) {
+            EObject obj = contents.next();
+            if (obj instanceof IdentifierReference) {
+                IdentifierReference ref = (IdentifierReference) obj;
+                if (ref.getTarget() == field) {
+                    matches.add(ref);
+                }
+            }
+        }
+        return matches;
+    }
+
+    private static List<MethodCall> collectMethodCallsTo(final Method method) {
+        List<MethodCall> matches = new ArrayList<>();
+        Iterator<EObject> contents = allEObjectContents(method);
+        while (contents.hasNext()) {
+            EObject obj = contents.next();
+            if (obj instanceof MethodCall) {
+                MethodCall call = (MethodCall) obj;
+                if (call.getTarget() == method) {
+                    matches.add(call);
+                }
+            }
+        }
+        return matches;
+    }
+
+    private static Iterator<EObject> allEObjectContents(final EObject seed) {
+        Resource resource = seed.eResource();
+        if (resource == null) {
+            return EcoreUtil.getAllContents(seed, true);
+        }
+        ResourceSet resourceSet = resource.getResourceSet();
+        if (resourceSet == null) {
+            return resource.getAllContents();
+        }
+        TreeIterator<Notifier> all = resourceSet.getAllContents();
+        return new Iterator<EObject>() {
+            private EObject lookahead = advance();
+
+            private EObject advance() {
+                while (all.hasNext()) {
+                    Notifier n = all.next();
+                    if (n instanceof EObject) {
+                        return (EObject) n;
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return lookahead != null;
+            }
+
+            @Override
+            public EObject next() {
+                EObject value = lookahead;
+                lookahead = advance();
+                return value;
+            }
+        };
+    }
+
+    private static void qualifyReceiverWithClassifier(final Reference innerRef, final ConcreteClassifier owner) {
+        EObject parent = innerRef.eContainer();
+        if (parent instanceof IdentifierReference) {
+            IdentifierReference parentRef = (IdentifierReference) parent;
+            if (parentRef.getNext() == innerRef && !(parentRef.getTarget() instanceof ConcreteClassifier)) {
+                parentRef.setTarget(owner);
+            }
+            return;
+        }
+        if (parent instanceof SelfReference) {
+            SelfReference selfRef = (SelfReference) parent;
+            if (selfRef.getNext() == innerRef) {
+                IdentifierReference classRef = ReferencesFactory.eINSTANCE.createIdentifierReference();
+                classRef.setTarget(owner);
+                EcoreUtil.replace(selfRef, classRef);
+                classRef.setNext(innerRef);
+            }
         }
     }
 }

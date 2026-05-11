@@ -11,6 +11,7 @@ import org.emftext.language.java.members.InterfaceMethod
 import org.emftext.language.java.members.Method
 import org.emftext.language.java.types.TypesFactory
 import static tools.vitruv.applications.util.temporary.java.CommonUtil.showMessage
+import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.rewriteMethodCallsToStaticCall
 import static extension tools.vitruv.applications.util.temporary.java.JavaModifierUtil.*
 
 import "http://www.eclipse.org/uml2/5.0.0/UML" as uml
@@ -208,6 +209,24 @@ routine setStatic(uml::Operation uFeat) {
 	}
 	update {
 		jMethod.static = uFeat.isStatic
+	}
+}
+
+@feature(type = "MethodStaticCall")
+reaction UmlOperationMadeStaticRewriteCallSites {
+	after attribute replaced at uml::Operation[isStatic]
+	with newValue == true && !(affectedEObject.class_ instanceof Interface)
+	call rewriteOperationCallsAsStatic(affectedEObject)
+}
+
+routine rewriteOperationCallsAsStatic(uml::Operation uOperation) {
+	match {
+		val jMethod = retrieve java::ClassMethod corresponding to uOperation
+	}
+	update {
+		jMethod.final = true
+		uOperation.isLeaf = true
+		rewriteMethodCallsToStaticCall(jMethod)
 	}
 }
 
