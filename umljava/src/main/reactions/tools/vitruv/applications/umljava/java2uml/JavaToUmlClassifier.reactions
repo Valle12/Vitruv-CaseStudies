@@ -216,14 +216,47 @@ reaction JavaClassInsertedAddDefaultConstructor {
 routine addUmlDefaultConstructor(java::Class jClass) {
 	match {
 		val uClass = retrieve uml::Class corresponding to jClass
+		check jClass.members.filter(org.emftext.language.java.members.Constructor).isEmpty
 		check uClass.ownedOperations.filter[name == jClass.name].isEmpty
 	}
 	create {
+		val jConstructor = new java::Constructor
 		val uConstructor = new uml::Operation
 	}
 	update {
+		jConstructor.name = jClass.name
+		jConstructor.makePublic
+		jClass.members += jConstructor
 		uConstructor.name = jClass.name
 		uClass.ownedOperations += uConstructor
+		addCorrespondenceBetween(uConstructor, jConstructor)
+		addCorrespondenceBetween(uClass, uConstructor, "DEFAULT_CONSTRUCTOR")
+	}
+}
+
+@feature(type = "ConstructorCreation")
+reaction JavaClassRenamedRenameConstructors {
+	after attribute replaced at java::Class[name]
+	call renameJavaClassConstructors(affectedEObject, oldValue)
+}
+
+routine renameJavaClassConstructors(java::Class jClass, String oldName) {
+	update {
+		jClass.members.filter(org.emftext.language.java.members.Constructor).filter[name == oldName].toList.forEach [
+			it.name = jClass.name
+			renameCorrespondingUmlOpForConstructor(it)
+		]
+	}
+}
+
+routine renameCorrespondingUmlOpForConstructor(java::Constructor jc) {
+	match {
+		val uOp = retrieve optional uml::Operation corresponding to jc
+	}
+	update {
+		uOp.ifPresent [
+			it.name = jc.name
+		]
 	}
 }
 

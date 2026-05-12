@@ -88,6 +88,9 @@ public final class JavaStatementUtil {
             Expression _expression = expressionStatement.getExpression();
             final AssignmentExpression assignmentExpression = ((AssignmentExpression) _expression);
             AssignmentExpressionChild _child = assignmentExpression.getChild();
+            if (!(_child instanceof SelfReference)) {
+                return null;
+            }
             Self _self = ((SelfReference) _child).getSelf();
             if ((_self instanceof This)) {
                 AssignmentExpressionChild _child_1 = assignmentExpression.getChild();

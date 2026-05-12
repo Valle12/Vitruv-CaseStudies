@@ -47,15 +47,89 @@ reaction UmlClassInsertedAddDefaultConstructor {
 routine addJavaDefaultConstructor(uml::Class umlClass) {
 	match {
 		val javaClass = retrieve java::Class corresponding to umlClass
+		check umlClass.ownedOperations.filter[name == umlClass.name].isEmpty
 		check javaClass.members.filter(Constructor).isEmpty
 	}
 	create {
+		val uConstructor = new uml::Operation
 		val javaConstructor = new java::Constructor
 	}
 	update {
+		uConstructor.name = umlClass.name
+		umlClass.ownedOperations += uConstructor
 		javaConstructor.name = javaClass.name
 		javaConstructor.makePublic
 		javaClass.members += javaConstructor
+		addCorrespondenceBetween(uConstructor, javaConstructor)
+		addCorrespondenceBetween(umlClass, uConstructor, "DEFAULT_CONSTRUCTOR")
+	}
+}
+
+@feature(type = "ConstructorCreation")
+reaction UmlClassRenamedRenameConstructors {
+	after attribute replaced at uml::Class[name]
+	call renameUmlClassConstructors(affectedEObject, oldValue)
+}
+
+routine renameUmlClassConstructors(uml::Class umlClass, String oldName) {
+	update {
+		umlClass.ownedOperations.filter[name == oldName].toList.forEach [
+			it.name = umlClass.name
+			renameCorrespondingJavaConstructorForOp(it)
+		]
+	}
+}
+
+routine renameCorrespondingJavaConstructorForOp(uml::Operation uOp) {
+	match {
+		val jc = retrieve optional java::Constructor corresponding to uOp
+	}
+	update {
+		jc.ifPresent [
+			it.name = uOp.name
+		]
+	}
+}
+
+@feature(type = "ConstructorCreation")
+reaction UmlOperationInsertedReplaceAutoDefault {
+	after element uml::Operation inserted in uml::Class[ownedOperation]
+	call maybeReplaceAutoUmlConstructor(affectedEObject, newValue)
+}
+
+routine maybeReplaceAutoUmlConstructor(uml::Class umlClass, uml::Operation newOp) {
+	match {
+		val autoOp = retrieve optional uml::Operation corresponding to umlClass tagged "DEFAULT_CONSTRUCTOR"
+	}
+	update {
+		autoOp.ifPresent [
+			if (it !== newOp && it.name == newOp.name && it.ownedParameters.filter[direction != org.eclipse.uml2.uml.ParameterDirectionKind.RETURN_LITERAL].size == newOp.ownedParameters.filter[direction != org.eclipse.uml2.uml.ParameterDirectionKind.RETURN_LITERAL].size) {
+				cleanupAutoJavaConstructorIfOrphan(it)
+				removeCorrespondenceBetween(umlClass, it, "DEFAULT_CONSTRUCTOR")
+				removeObject(it)
+			}
+		]
+	}
+}
+
+routine cleanupAutoJavaConstructorIfOrphan(uml::Operation autoOp) {
+	match {
+		val autoJC = retrieve optional java::Constructor corresponding to autoOp
+	}
+	update {
+		autoJC.ifPresent [
+			removeCorrespondenceBetween(autoOp, it)
+			removeAutoJavaConstructorIfNoUmlCorrespondence(it)
+		]
+	}
+}
+
+routine removeAutoJavaConstructorIfNoUmlCorrespondence(java::Constructor jc) {
+	match {
+		require absence of uml::Operation corresponding to jc
+	}
+	update {
+		removeObject(jc)
 	}
 }
 
