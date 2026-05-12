@@ -274,7 +274,28 @@ routine addJavaRealizationSuffix(uml::Class umlClass) {
 		check !javaClass.name.endsWith("Impl")
 	}
 	update {
-		javaClass.name = javaClass.name + "Impl"
+		val newName = javaClass.name + "Impl"
+		javaClass.name = newName
+		umlClass.name = newName
+	}
+}
+
+@feature(type = "RealizationSuffix")
+reaction UmlInterfaceRealizationRemovedStripSuffix {
+	after element uml::InterfaceRealization removed from uml::Class[interfaceRealization]
+	call stripJavaRealizationSuffix(affectedEObject)
+}
+
+routine stripJavaRealizationSuffix(uml::Class umlClass) {
+	match {
+		val javaClass = retrieve java::Class corresponding to umlClass
+		check umlClass.interfaceRealizations.empty
+		check javaClass.name.endsWith("Impl")
+	}
+	update {
+		val newName = javaClass.name.substring(0, javaClass.name.length - "Impl".length)
+		javaClass.name = newName
+		umlClass.name = newName
 	}
 }
 

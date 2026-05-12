@@ -403,10 +403,32 @@ reaction JavaClassImplementAddedAppendSuffix {
 
 routine addJavaRealizationSuffix(java::Class jClass) {
 	match {
+		val uClass = retrieve uml::Class corresponding to jClass
 		check !jClass.name.endsWith("Impl")
 	}
 	update {
-		jClass.name = jClass.name + "Impl"
+		val newName = jClass.name + "Impl"
+		jClass.name = newName
+		uClass.name = newName
+	}
+}
+
+@feature(type = "RealizationSuffix")
+reaction JavaClassImplementRemovedStripSuffix {
+	after element java::TypeReference removed from java::Class[implements]
+	call stripJavaRealizationSuffix(affectedEObject)
+}
+
+routine stripJavaRealizationSuffix(java::Class jClass) {
+	match {
+		val uClass = retrieve uml::Class corresponding to jClass
+		check jClass.implements.empty
+		check jClass.name.endsWith("Impl")
+	}
+	update {
+		val newName = jClass.name.substring(0, jClass.name.length - "Impl".length)
+		jClass.name = newName
+		uClass.name = newName
 	}
 }
 

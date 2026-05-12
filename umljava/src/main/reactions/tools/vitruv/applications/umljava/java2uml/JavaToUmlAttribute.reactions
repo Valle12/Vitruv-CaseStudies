@@ -1,3 +1,4 @@
+import tools.vitruv.applications.util.temporary.java.UmlJavaCorrespondenceTag
 import static tools.vitruv.applications.util.temporary.java.CommonUtil.showMessage
 import static tools.vitruv.applications.util.temporary.java.JavaMemberAndParameterUtil.*
 import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.rewriteFieldAccessToStaticCall
@@ -108,6 +109,9 @@ reaction JavaAttributeCreatedInEnumEnforceAccessorGeneration {
 }
 
 routine enforceJavaAccessorGeneration(java::ConcreteClassifier jClassifier, java::Field jField) {
+	match {
+		val uAttr = retrieve uml::Property corresponding to jField
+	}
 	update {
 		jField.makePrivate
 		val getterName = buildGetterName(jField.name)
@@ -115,17 +119,137 @@ routine enforceJavaAccessorGeneration(java::ConcreteClassifier jClassifier, java
 		val existingGetter = jClassifier.members.filter(org.emftext.language.java.members.ClassMethod).filter [
 			name == getterName
 		].claimNotMany
-		if (existingGetter === null) {
+		val effectiveGetter = if (existingGetter === null) {
 			val getter = createGetterForAttribute(jField)
 			jClassifier.members += getter
+			getter
+		} else {
+			existingGetter
 		}
+		addCorrespondenceBetween(uAttr, effectiveGetter, UmlJavaCorrespondenceTag.GETTER)
 		val existingSetter = jClassifier.members.filter(org.emftext.language.java.members.ClassMethod).filter [
 			name == setterName
 		].claimNotMany
-		if (existingSetter === null) {
+		val effectiveSetter = if (existingSetter === null) {
 			val setter = createSetterForAttribute(jField)
 			jClassifier.members += setter
+			setter
+		} else {
+			existingSetter
 		}
+		addCorrespondenceBetween(uAttr, effectiveSetter, UmlJavaCorrespondenceTag.SETTER)
+	}
+}
+
+@feature(type = "AccessorGeneration")
+reaction JavaFieldRenamedRenameAccessors {
+	after attribute replaced at java::Field[name]
+	call renameJavaAccessorsForField(affectedEObject, oldValue)
+}
+
+routine renameJavaAccessorsForField(java::Field jField, String oldName) {
+	match {
+		val uAttr = retrieve uml::Property corresponding to jField
+		val jGetter = retrieve optional java::ClassMethod corresponding to uAttr tagged UmlJavaCorrespondenceTag.GETTER
+		val jSetter = retrieve optional java::ClassMethod corresponding to uAttr tagged UmlJavaCorrespondenceTag.SETTER
+	}
+	update {
+		jGetter.ifPresent[renameGetterOfAttribute(it, jField)]
+		jSetter.ifPresent[renameSetter(it, jField, oldName)]
+	}
+}
+
+@feature(type = "AccessorGeneration")
+reaction JavaFieldRemovedFromClassDeleteAccessors {
+	after element java::Field removed from java::Class[members]
+	call deleteJavaAccessorsForField(oldValue)
+}
+
+@feature(type = "AccessorGeneration")
+reaction JavaFieldRemovedFromEnumDeleteAccessors {
+	after element java::Field removed from java::Enumeration[members]
+	call deleteJavaAccessorsForField(oldValue)
+}
+
+routine deleteJavaAccessorsForField(java::Field jField) {
+	match {
+		val uAttr = retrieve uml::Property corresponding to jField
+	}
+	update {
+		deleteTaggedJavaAccessor(uAttr, UmlJavaCorrespondenceTag.GETTER)
+		deleteTaggedJavaAccessor(uAttr, UmlJavaCorrespondenceTag.SETTER)
+	}
+}
+
+routine deleteTaggedJavaAccessor(uml::Property uAttr, String tag) {
+	match {
+		val jAccessor = retrieve optional java::ClassMethod corresponding to uAttr tagged tag
+	}
+	update {
+		jAccessor.ifPresent [
+			removeCorrespondenceBetween(it, uAttr, tag)
+			removeObject(it)
+		]
+	}
+}
+
+@feature(type = "AccessorGeneration")
+reaction JavaClassMethodInsertedInClassReplaceAutoAccessor {
+	after element java::ClassMethod inserted in java::Class[members]
+	call replaceAutoAccessorIfPresent(affectedEObject, newValue)
+}
+
+@feature(type = "AccessorGeneration")
+reaction JavaClassMethodInsertedInEnumReplaceAutoAccessor {
+	after element java::ClassMethod inserted in java::Enumeration[members]
+	call replaceAutoAccessorIfPresent(affectedEObject, newValue)
+}
+
+routine replaceAutoAccessorIfPresent(java::ConcreteClassifier jClassifier, java::ClassMethod jMethod) {
+	update {
+		for (jField : jClassifier.members.filter(org.emftext.language.java.members.Field).toList) {
+			if (jMethod.name == buildGetterName(jField.name)) {
+				replaceTaggedAutoAccessor(jField, jMethod, UmlJavaCorrespondenceTag.GETTER)
+			} else if (jMethod.name == buildSetterName(jField.name)) {
+				replaceTaggedAutoAccessor(jField, jMethod, UmlJavaCorrespondenceTag.SETTER)
+			}
+		}
+	}
+}
+
+routine replaceTaggedAutoAccessor(java::Field jField, java::ClassMethod newAccessor, String tag) {
+	match {
+		val uAttr = retrieve uml::Property corresponding to jField
+		val autoAccessor = retrieve optional java::ClassMethod corresponding to uAttr tagged tag
+	}
+	update {
+		autoAccessor.ifPresent [
+			if (it !== newAccessor) {
+				removeCorrespondenceBetween(it, uAttr, tag)
+				addCorrespondenceBetween(uAttr, newAccessor, tag)
+				detachAutoAccessorFromUml(it)
+				adoptManualAccessorVisibility(newAccessor)
+				removeObject(it)
+			}
+		]
+	}
+}
+
+routine detachAutoAccessorFromUml(java::ClassMethod jAccessor) {
+	match {
+		val uOp = retrieve uml::Operation corresponding to jAccessor
+	}
+	update {
+		removeCorrespondenceBetween(uOp, jAccessor)
+	}
+}
+
+routine adoptManualAccessorVisibility(java::ClassMethod jAccessor) {
+	match {
+		val uOp = retrieve uml::Operation corresponding to jAccessor
+	}
+	update {
+		uOp.visibility = getUmlVisibilityKindFromJavaElement(jAccessor)
 	}
 }
 
