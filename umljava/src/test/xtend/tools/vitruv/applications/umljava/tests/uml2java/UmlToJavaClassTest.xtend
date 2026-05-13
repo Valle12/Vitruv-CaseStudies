@@ -16,10 +16,13 @@ import static tools.vitruv.applications.util.temporary.java.JavaTypeUtil.getClas
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.claimOne
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * This class provides tests for basic class tests in the UML to Java direction
  */
+@RequiresFeatures("ClassCreation.Class")
 class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	static val PACKAGE_NAME = "rootpackage"
 	static val DEFAULT_CLASS_NAME = "TestClass"
@@ -153,6 +156,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@IncompatibleFeatures("RealizationSuffix")
 	def void testAddClassImplements() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		createInterfaceInRootPackage(DEFAULT_INTERFACE_NAME)
@@ -168,6 +172,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@IncompatibleFeatures("RealizationSuffix")
 	def void testDeleteClassImplements() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		createInterfaceInRootPackage(DEFAULT_INTERFACE_NAME)
@@ -191,6 +196,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@IncompatibleFeatures("RealizationSuffix")
 	def void testChangeInterfaceImplementer() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		createClassInRootPackage(ADDITIONAL_CLASS_NAME)

@@ -16,6 +16,7 @@ import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
 import static extension tools.vitruv.applications.util.temporary.java.JavaContainerAndClassifierUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * This class contains Tests for creating, deleting and renaming enumerations.
@@ -195,6 +196,7 @@ class JavaToUmlEnumTest extends AbstractJavaToUmlTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testAddEnumAttribute() {
 		createJavaEnumInRootPackage(ENUM_NAME)
 		createJavaClassInRootPackage(TYPE_CLASS_NAME)

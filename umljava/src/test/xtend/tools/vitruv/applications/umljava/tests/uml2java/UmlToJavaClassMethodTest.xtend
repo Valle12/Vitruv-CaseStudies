@@ -19,10 +19,12 @@ import static tools.vitruv.applications.util.temporary.java.JavaModifierUtil.get
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * A test class to test class methods and its traits.
  */
+@RequiresFeatures("ClassCreation.Class")
 class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	static val CLASS_NAME = "ClassName"
 	static val CLASS_NAME_2 = "ClassName2"

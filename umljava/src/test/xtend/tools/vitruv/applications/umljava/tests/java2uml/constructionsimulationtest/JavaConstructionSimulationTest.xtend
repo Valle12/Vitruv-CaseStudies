@@ -24,6 +24,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import tools.vitruv.applications.umljava.tests.java2uml.AbstractJavaToUmlTest
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 import tools.vitruv.applications.util.temporary.java.JavaSetup
 
 import static com.google.common.base.Preconditions.checkArgument
@@ -45,6 +47,7 @@ import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resou
 /**
  * Test class for the reconstruction of existing java models
  */
+@RequiresFeatures("ClassCreation.Class")
 class JavaConstructionSimulationTest extends AbstractJavaToUmlTest {
 	static val LOGGER = Logger.getLogger(JavaConstructionSimulationTest)
 
@@ -82,6 +85,7 @@ class JavaConstructionSimulationTest extends AbstractJavaToUmlTest {
 	 * https://repository.genmymodel.com/suresh519/MyProject (12.5.2017)
 	 */
 	@Test
+	@IncompatibleFeatures("RealizationSuffix")
 	def void testMyProject() {
 		transformJavaProjectAndValidateUmlModel("src/test/resources/suresh519/java/")
 	}
@@ -91,6 +95,7 @@ class JavaConstructionSimulationTest extends AbstractJavaToUmlTest {
 	 * https://github.com/orhanobut/logger (12.5.2017)
 	 */
 	@Test
+	@IncompatibleFeatures(#["InterfacePrefix", "RealizationSuffix"])
 	def void testOrhanobutLoggerProject() {
 		registerStdLibraryModule("java.xml")
 		registerLocalLibrary(Path.of(new File("target/test-classes/dependencies/json.jar").absolutePath))

@@ -8,9 +8,12 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import tools.vitruv.applications.umljava.tests.uml2java.AbstractUmlToJavaTest
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 import static extension edu.kit.ipd.sdq.commons.util.org.eclipse.emf.ecore.resource.ResourceUtil.getFirstRootEObject
 
+@RequiresFeatures("ClassCreation.Class")
 class UmlConstructionSimulationTest extends AbstractUmlToJavaTest {
 	static val RESOURCES_FOLDER = "src/test/resources/"
 
@@ -24,6 +27,7 @@ class UmlConstructionSimulationTest extends AbstractUmlToJavaTest {
 		"suresh519/uml/MyProject", // UML model from "myproject" by suresh519: https://repository.genmymodel.com/suresh519/MyProject (12.5.2017)
 		"orhanobut/uml/model" // UML model from the logger project by orhan obut:  https://github.com/orhanobut/logger (12.5.2017)
 	])
+	@IncompatibleFeatures("RealizationSuffix")
 	def void testCompleteModel(String modelFileName) {
 		transformUmlModelAndValidateJavaCode(RESOURCES_FOLDER + modelFileName + "." + MODEL_FILE_EXTENSION)
 	}

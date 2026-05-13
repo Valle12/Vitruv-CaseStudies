@@ -10,6 +10,7 @@ import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
 import static extension tools.vitruv.applications.util.temporary.java.JavaContainerAndClassifierUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
 
 /**
  * A Test class for interface tests. Checks their creation, renaming, deleting and the 
@@ -107,6 +108,7 @@ class JavaToUmlInterfaceTest extends AbstractJavaToUmlTest {
 	}
 
 	@Test
+	@IncompatibleFeatures("InterfacePrefix")
 	def void testAddSuperInterface() {
 		createJavaInterfaceInRootPackage(INTERFACE_NAME)
 		createJavaInterfaceInRootPackage(SUPER_INTERFACE1_NAME)
@@ -126,6 +128,7 @@ class JavaToUmlInterfaceTest extends AbstractJavaToUmlTest {
 	}
 
 	@Test
+	@IncompatibleFeatures("InterfacePrefix")
 	def void testRemoveSuperInterface() {
 		createJavaInterfaceInRootPackage(INTERFACE_NAME)
 		createJavaInterfaceInRootPackage(SUPER_INTERFACE1_NAME)

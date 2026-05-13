@@ -14,6 +14,7 @@ import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * This class contains test cases for the creation, renaming and deleting of interface methods.
@@ -76,6 +77,7 @@ class JavaToUmlInterfaceMethodTest extends AbstractJavaToUmlTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testChangeInterfaceMethodReturnType() {
 		createDefaultInterfaceWithMethod(IOPERATION_NAME)
 		createJavaClassInRootPackage(TYPE_NAME)
@@ -96,6 +98,7 @@ class JavaToUmlInterfaceMethodTest extends AbstractJavaToUmlTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testCreateInterfaceParameter() {
 		createDefaultInterfaceWithMethod(IOPERATION_NAME)
 		createJavaClassInRootPackage(TYPE_NAME)

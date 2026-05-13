@@ -17,10 +17,13 @@ import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
 import static extension tools.vitruv.applications.util.temporary.java.JavaContainerAndClassifierUtil.*
 import static extension tools.vitruv.applications.util.temporary.java.JavaModifierUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * A Test class to test classes and their traits.
  */
+@RequiresFeatures("ClassCreation.Class")
 class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	static val PACKAGE_NAME = "packagename"
 	static val CLASS_NAME = "ClassName"
@@ -245,6 +248,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Check the creation of an interface implementation on the UML side.
 	 */
 	@Test
+	@IncompatibleFeatures("RealizationSuffix")
 	def void testAddClassImplement() {
 		createJavaClassInRootPackage(CLASS_NAME)
 		createJavaInterfaceInRootPackage(INTERFACE_NAME)
@@ -266,6 +270,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests if removing an implementation relation is correctly reflected on the UML side.
 	 */
 	@Test
+	@IncompatibleFeatures("RealizationSuffix")
 	def void testRemoveClassImplement() {
 		createJavaClassInRootPackage(CLASS_NAME)
 		createJavaInterfaceInRootPackage(INTERFACE_NAME)

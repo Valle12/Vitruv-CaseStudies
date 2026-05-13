@@ -11,6 +11,7 @@ import tools.vitruv.applications.umljava.JavaToUmlChangePropagationSpecification
 import tools.vitruv.applications.umljava.UmlToJavaChangePropagationSpecification
 import tools.vitruv.applications.umljava.tests.util.JavaUmlClassifierEqualityValidation
 import tools.vitruv.applications.umljava.tests.util.JavaUmlViewFactory
+import tools.vitruv.applications.umljava.tests.util.conditional.FeatureGateCondition
 import tools.vitruv.applications.util.temporary.java.JavaSetup
 import tools.vitruv.framework.views.View
 import tools.vitruv.change.testutils.RegisterMetamodelsInStandalone
@@ -19,6 +20,7 @@ import tools.vitruv.framework.testutils.integration.ViewBasedVitruvApplicationTe
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 
 @ExtendWith(RegisterMetamodelsInStandalone)
+@ExtendWith(FeatureGateCondition)
 abstract class UmlJavaTransformationTest extends ViewBasedVitruvApplicationTest {
 	protected var extension JavaUmlViewFactory viewFactory
 

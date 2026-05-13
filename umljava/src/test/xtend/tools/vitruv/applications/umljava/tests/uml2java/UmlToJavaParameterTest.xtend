@@ -11,10 +11,12 @@ import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * This class tests the change of parameter traits.
  */
+@RequiresFeatures("ClassCreation.Class")
 class UmlToJavaParameterTest extends AbstractUmlToJavaTest {
 	static val CLASS_NAME = "ClassName"
 	static val TYPE_CLASS_NAME = "TypeName"

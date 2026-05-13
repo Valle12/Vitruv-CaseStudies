@@ -13,10 +13,12 @@ import static tools.vitruv.applications.util.temporary.uml.UmlPropertyAndAssocia
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * This test class contains basic tests for associations.
  */
+@RequiresFeatures("ClassCreation.Class")
 class UmlToJavaAssociationTest extends AbstractUmlToJavaTest {
 	static val CLASS_NAME_1 = "ClassName1"
 	static val CLASS_NAME_2 = "ClassName2"

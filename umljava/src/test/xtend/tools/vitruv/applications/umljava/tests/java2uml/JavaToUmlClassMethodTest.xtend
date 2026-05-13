@@ -20,10 +20,12 @@ import static tools.vitruv.applications.util.temporary.java.JavaStandardType.*
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
 import static extension tools.vitruv.applications.util.temporary.java.JavaModifierUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * A test class to test the class method reactions.
  */
+@RequiresFeatures("ClassCreation.Class")
 class JavaToUmlClassMethodTest extends AbstractJavaToUmlTest {
 	static val CLASS_NAME = "ClassName"
 	static val TYPE_CLASS_NAME = "TypeName"

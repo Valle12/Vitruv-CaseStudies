@@ -21,10 +21,12 @@ import static tools.vitruv.applications.util.temporary.java.JavaStandardType.*
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
 import static extension tools.vitruv.applications.util.temporary.java.JavaModifierUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * Test class for testing the attribute reactions.
  */
+@RequiresFeatures("ClassCreation.Class")
 class JavaToUmlAttributeTest extends AbstractJavaToUmlTest {
 	static val ATTRIBUTE_NAME = "attributName"
 	static val ATTRIBUTE_RENAME = "attributeRenamed"

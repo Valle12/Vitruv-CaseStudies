@@ -23,11 +23,13 @@ import static tools.vitruv.applications.util.temporary.java.JavaModifierUtil.get
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * This test class checks the creating, deleting and modifying of attributes in the UML to Java
  * direction.
  */
+@RequiresFeatures("ClassCreation.Class")
 class UmlToJavaAttributeTest extends AbstractUmlToJavaTest {
 	static val ATTRIBUTE_NAME = "attributName"
 	static val ATTRIBUTE_RENAME = "attributeRenamed"
