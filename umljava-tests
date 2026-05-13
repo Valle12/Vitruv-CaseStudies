@@ -1,1 +1,1 @@
-./mvnw clean && ./mvnw -pl pcmumlclass,util.temporary,testutility,testutility.integration -am install -DskipTests && ./mvnw -pl umljava test -Dumljava.reactions.dir=/mnt/e/projects/Vitruv-DSLs/reactions/preprocessor/src/main/resources/configs/config5-reactions
+./mvnw clean && ./mvnw -pl pcmumlclass,util.temporary,testutility,testutility.integration -am install -DskipTests && ./mvnw -pl umljava test -Dumljava.reactions.dir=/mnt/e/projects/Vitruv-DSLs/reactions/preprocessor/src/main/resources/configs/config7-reactions

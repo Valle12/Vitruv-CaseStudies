@@ -55,6 +55,9 @@ public final class ActiveFeatures {
     if (dir == null || dir.isBlank()) {
       return Snapshot.allActive();
     }
+    // Defensive: scripts saved with CRLF (e.g. umljava-tests on Windows) can leave a
+    // trailing \r in the property value when invoked from WSL. Strip it.
+    dir = dir.strip();
 
     Path reactionsDir = Path.of(dir).toAbsolutePath().normalize();
     Path json = locateConfigJson(reactionsDir);
