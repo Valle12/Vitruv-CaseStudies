@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# Run umljava tests against every preprocessed configN-reactions dir and print
+# a summary table of tests / failures / errors / skipped per config.
+#
+# Usage:
+#   ./umljava-tests-all-configs                 # run configs 1..9
+#   ./umljava-tests-all-configs 1 3 5           # run only the listed configs
+#   SKIP_SETUP=1 ./umljava-tests-all-configs    # reuse already-installed deps
+#
+# Logs land in ./umljava-tests-logs/ (one file per config + summary.log).
+
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+CFG_DIR="${UMLJAVA_CFG_DIR:-/home/valentin/IdeaProjects/Vitruv-DSLs/reactions/preprocessor/src/main/resources/configs}"
+LOG_DIR="${UMLJAVA_LOG_DIR:-$ROOT/umljava-tests-logs}"
+
+if [ "$#" -gt 0 ]; then
+  CONFIGS=("$@")
+else
+  CONFIGS=(1 2 3 4 5 6 7 8 9)
+fi
+
+mkdir -p "$LOG_DIR"
+SUMMARY="$LOG_DIR/summary.log"
+: > "$SUMMARY"
+
+log()  { printf '%s %s\n' "$(date -Is)" "$*" | tee -a "$SUMMARY"; }
+
+cd "$ROOT" || exit
+
+if [ "${SKIP_SETUP:-0}" != "1" ]; then
+  log "[setup] clean"
+  if ! ./mvnw -q clean > "$LOG_DIR/00-clean.log" 2>&1; then
+    log "[setup] clean FAILED (see $LOG_DIR/00-clean.log)"
+    exit 1
+  fi
+  log "[setup] install deps"
+  if ! ./mvnw -q -pl pcmumlclass,util.temporary,testutility,testutility.integration \
+        -am install -DskipTests > "$LOG_DIR/00-install.log" 2>&1; then
+    log "[setup] install FAILED (see $LOG_DIR/00-install.log)"
+    exit 1
+  fi
+else
+  log "[setup] skipped (SKIP_SETUP=1)"
+fi
+
+declare -A RUN FAIL ERR SKIP STATUS
+
+for n in "${CONFIGS[@]}"; do
+  REAC="$CFG_DIR/config${n}-reactions"
+  LOG="$LOG_DIR/config${n}.log"
+  if [ ! -d "$REAC" ]; then
+    log "[config$n] MISSING $REAC — skipping"
+    STATUS[$n]="missing"; RUN[$n]=0; FAIL[$n]=0; ERR[$n]=0; SKIP[$n]=0
+    continue
+  fi
+
+  log "[config$n] starting"
+  ./mvnw -pl umljava clean test -Dumljava.reactions.dir="$REAC" > "$LOG" 2>&1
+  rc=$?
+
+  line=$(grep -E "Tests run:[[:space:]]*[0-9]+,[[:space:]]*Failures:[[:space:]]*[0-9]+,[[:space:]]*Errors:[[:space:]]*[0-9]+,[[:space:]]*Skipped:[[:space:]]*[0-9]+" "$LOG" | tail -1)
+  if [ -n "$line" ]; then
+    RUN[$n]=$(sed -nE 's/.*Tests run:[[:space:]]*([0-9]+).*/\1/p'   <<<"$line")
+    FAIL[$n]=$(sed -nE 's/.*Failures:[[:space:]]*([0-9]+).*/\1/p'    <<<"$line")
+    ERR[$n]=$(sed -nE 's/.*Errors:[[:space:]]*([0-9]+).*/\1/p'       <<<"$line")
+    SKIP[$n]=$(sed -nE 's/.*Skipped:[[:space:]]*([0-9]+).*/\1/p'     <<<"$line")
+  else
+    RUN[$n]=0; FAIL[$n]=0; ERR[$n]=0; SKIP[$n]=0
+  fi
+
+  if [ "$rc" -eq 0 ]; then
+    STATUS[$n]="ok"
+  elif [ -n "$line" ]; then
+    STATUS[$n]="failed"
+  else
+    STATUS[$n]="build-error"
+  fi
+
+  log "[config$n] rc=$rc status=${STATUS[$n]} tests=${RUN[$n]} failures=${FAIL[$n]} errors=${ERR[$n]} skipped=${SKIP[$n]}"
+done
+
+{
+  echo
+  echo "=== Summary ==="
+  printf '%-9s %-12s %7s %9s %7s %8s\n' "Config" "Status" "Tests" "Failures" "Errors" "Skipped"
+  printf '%-9s %-12s %7s %9s %7s %8s\n' "------" "------"      "-----" "--------" "------" "-------"
+  total_run=0; total_fail=0; total_err=0; total_skip=0
+  for n in "${CONFIGS[@]}"; do
+    printf '%-9s %-12s %7s %9s %7s %8s\n' \
+      "config$n" "${STATUS[$n]}" "${RUN[$n]}" "${FAIL[$n]}" "${ERR[$n]}" "${SKIP[$n]}"
+    total_run=$((total_run + RUN[$n]))
+    total_fail=$((total_fail + FAIL[$n]))
+    total_err=$((total_err + ERR[$n]))
+    total_skip=$((total_skip + SKIP[$n]))
+  done
+  printf '%-9s %-12s %7s %9s %7s %8s\n' "TOTAL" "" "$total_run" "$total_fail" "$total_err" "$total_skip"
+
+  for n in "${CONFIGS[@]}"; do
+    if [ "${FAIL[$n]:-0}" -gt 0 ] || [ "${ERR[$n]:-0}" -gt 0 ]; then
+      echo
+      echo "--- config$n failing tests ---"
+      grep -E "^\[ERROR\]   [A-Za-z0-9_.]+\." "$LOG_DIR/config${n}.log" | sed 's/^\[ERROR\]   /  /'
+    fi
+  done
+} | tee -a "$SUMMARY"

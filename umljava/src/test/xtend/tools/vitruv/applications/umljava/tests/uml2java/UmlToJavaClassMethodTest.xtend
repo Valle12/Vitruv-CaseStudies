@@ -4,6 +4,11 @@ import org.eclipse.uml2.uml.Model
 import org.eclipse.uml2.uml.Operation
 import org.eclipse.uml2.uml.VisibilityKind
 import org.emftext.language.java.members.ClassMethod
+import org.emftext.language.java.members.Constructor
+import org.emftext.language.java.parameters.Parameter
+import org.emftext.language.java.references.IdentifierReference
+import org.emftext.language.java.references.ReferencesFactory
+import org.emftext.language.java.statements.ExpressionStatement
 import org.emftext.language.java.statements.StatementsFactory
 import org.emftext.language.java.types.TypesFactory
 import org.junit.jupiter.api.Test
@@ -13,18 +18,21 @@ import tools.vitruv.applications.util.temporary.java.JavaVisibility
 
 import static org.hamcrest.CoreMatchers.*
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.applications.testutility.integration.JavaElementsTestAssertions.*
 import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.*
 import static tools.vitruv.applications.util.temporary.java.JavaModifierUtil.getJavaVisibilityConstantFromUmlVisibilityKind
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
 import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * A test class to test class methods and its traits.
  */
-@RequiresFeatures("ClassCreation.Class")
 class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	static val CLASS_NAME = "ClassName"
 	static val CLASS_NAME_2 = "ClassName2"
@@ -39,6 +47,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * Java method.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testCreateClassMethod() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		assertSingleClassWithNameInRootPackage(CLASS_NAME)
@@ -55,6 +64,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * the corresponding Java method adapted the corresponding type.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testChangeReturnType() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		createClassInRootPackage(TYPE_CLASS_NAME)
@@ -73,6 +83,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * Tests if renaming a method is correctly reflected on the Java side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testRenameMethod() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		changeMethod(CLASS_NAME, OPERATION_NAME) [
@@ -89,6 +100,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * Tests if deleting a method is correctly reflected on the Java side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testDeleteMethod() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		changeMethod(CLASS_NAME, OPERATION_NAME) [
@@ -102,6 +114,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testMoveMethod() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		createClassInRootPackage(CLASS_NAME_2)
@@ -120,6 +133,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testMoveMethodWithImplementation() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		createClassInRootPackage(CLASS_NAME_2)
@@ -149,6 +163,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * Tests if setting a method static correctly reflected on the Java side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testStaticMethod() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		changeAndCheckPropertyOfAttribute(CLASS_NAME, OPERATION_NAME, [isStatic = true], [
@@ -163,6 +178,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * Tests if setting a method final correctly reflected on the Java side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testFinalMethod() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		changeAndCheckPropertyOfAttribute(CLASS_NAME, OPERATION_NAME, [isLeaf = true], [
@@ -177,6 +193,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * Tests if setting a method abstract is correctly reflected on the Java side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def testAbstractMethod() {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		changeAndCheckPropertyOfAttribute(CLASS_NAME, OPERATION_NAME, [isAbstract = true], [
@@ -192,6 +209,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 */
 	@ParameterizedTest
 	@EnumSource(value=VisibilityKind, names=#["PUBLIC_LITERAL"], mode=EnumSource.Mode.EXCLUDE)
+	@RequiresFeatures("ClassCreation.Class")
 	def void testMethodVisibility(VisibilityKind visibility) {
 		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
 		changeAndCheckPropertyOfAttribute(CLASS_NAME, OPERATION_NAME, [it.visibility = visibility], [
@@ -204,6 +222,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * constructor is created on the Java side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testCreateConstructor() {
 		createClassWithOperation(CLASS_NAME, CLASS_NAME)
 		assertSingleClassWithNameInRootPackage(CLASS_NAME)
@@ -213,6 +232,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testMoveConstructor() {
 		createClassWithOperation(CLASS_NAME, CLASS_NAME)
 		createClassInRootPackage(CLASS_NAME_2)
@@ -238,6 +258,7 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 	 * Same as testMoveConstructor but the order of move and rename is switched
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testMoveConstructor2() {
 		createClassWithOperation(CLASS_NAME, CLASS_NAME)
 		createClassInRootPackage(CLASS_NAME_2)
@@ -358,6 +379,104 @@ class UmlToJavaClassMethodTest extends AbstractUmlToJavaTest {
 		validateJavaView [
 			val javaMethod = claimJavaClass(className).claimClassMethod(methodName)
 			validateJavaMethod.apply(javaMethod)
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "MethodStaticCall"])
+	def void testMethodStaticCallMakesMethodFinal() {
+		createClassWithOperation(CLASS_NAME, OPERATION_NAME)
+		changeMethod(CLASS_NAME, OPERATION_NAME) [ method |
+			method.isStatic = true
+		]
+		validateJavaView [
+			val javaMethod = claimJavaClass(CLASS_NAME).claimClassMethod(OPERATION_NAME)
+			assertJavaModifiableFinal(javaMethod, true)
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "MethodStaticCall"])
+	def void testMethodStaticCallRewritesCrossClassReceiver() {
+		val ownerName = "OwnerClass"
+		val callerName = "CallerClass"
+		val targetMethodName = "doWork"
+		val callerMethodName = "callIt"
+		val paramName = "owner"
+
+		createClassInRootPackage(ownerName)
+		changeUmlModel [
+			claimClass(ownerName) => [
+				createOwnedOperation(targetMethodName, null, null, null)
+			]
+		]
+		createClassInRootPackage(callerName)
+		changeUmlModel [
+			val ownerUml = claimClass(ownerName)
+			claimClass(callerName) => [
+				createOwnedOperation(callerMethodName, null, null, null) => [
+					createOwnedParameter(paramName, ownerUml)
+				]
+			]
+		]
+
+		// Inject `owner.doWork();` into the caller method so the rewrite has something to fix.
+		changeJavaView [
+			val targetJavaMethod = claimJavaClass(ownerName).claimClassMethod(targetMethodName)
+			claimJavaClass(callerName).claimClassMethod(callerMethodName) => [
+				val javaParam = claimParameter(paramName)
+				val paramRef = ReferencesFactory.eINSTANCE.createIdentifierReference => [
+					target = javaParam
+				]
+				val methodCall = ReferencesFactory.eINSTANCE.createMethodCall => [
+					target = targetJavaMethod
+				]
+				paramRef.setNext(methodCall)
+				statements += StatementsFactory.eINSTANCE.createExpressionStatement => [
+					expression = paramRef
+				]
+			]
+		]
+		validateJavaView [
+			val expr = ((claimJavaClass(callerName).claimClassMethod(callerMethodName).statements.head
+				as ExpressionStatement).expression) as IdentifierReference
+			assertTrue(expr.target instanceof Parameter,
+				"Sanity: before isStatic=true the call receiver should still be the parameter")
+		]
+
+		changeMethod(ownerName, targetMethodName) [ op |
+			op.isStatic = true
+		]
+
+		validateJavaView [
+			val javaOwner = claimJavaClass(ownerName)
+			val expr = ((claimJavaClass(callerName).claimClassMethod(callerMethodName).statements.head
+				as ExpressionStatement).expression) as IdentifierReference
+			assertEquals(javaOwner, expr.target,
+				"After MethodStaticCall, the instance receiver must be rewritten to the owner Java class")
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "ConstructorCreation"])
+	def void testConstructorCreationAddsDefaultConstructor() {
+		createClassInRootPackage(CLASS_NAME)
+		validateJavaView [
+			val javaClass = claimJavaClass(CLASS_NAME)
+			assertFalse(javaClass.members.filter(Constructor).empty,
+				"a default constructor must be added when ConstructorCreation is active")
+		]
+	}
+
+	@Test
+	@RequiresFeatures("ClassCreation.Class")
+	@IncompatibleFeatures("ConstructorCreation")
+	def void testNoDefaultConstructorWhenFeatureInactive() {
+		createClassInRootPackage(CLASS_NAME)
+		validateJavaView [
+			val javaClass = claimJavaClass(CLASS_NAME)
+			assertTrue(javaClass.members.filter(Constructor).empty,
+				"no default constructor must be added when ConstructorCreation is inactive")
 		]
 	}
 

@@ -21,21 +21,6 @@ public final class ActiveFeatures {
     return s.allActive || s.features.contains(feature);
   }
 
-  /**
-   * @return an unmodifiable snapshot of the current feature set, for logging/diagnostics.
-   */
-  public static Set<String> snapshotFeatures() {
-    Snapshot s = snapshot();
-    return s.allActive ? Collections.emptySet() : Collections.unmodifiableSet(s.features);
-  }
-
-  /**
-   * @return true if no specific config is known and all features are assumed active.
-   */
-  public static boolean isAllActiveSentinel() {
-    return snapshot().allActive;
-  }
-
   private static Snapshot snapshot() {
     Snapshot s = snapshot;
     if (s == null) {

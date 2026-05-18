@@ -14,6 +14,7 @@ import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
 import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
@@ -98,7 +99,7 @@ class JavaToUmlInterfaceMethodTest extends AbstractJavaToUmlTest {
 	}
 
 	@Test
-	@RequiresFeatures("ClassCreation.Class")
+	@IncompatibleFeatures("ClassCreation.Interface")
 	def void testCreateInterfaceParameter() {
 		createDefaultInterfaceWithMethod(IOPERATION_NAME)
 		createJavaClassInRootPackage(TYPE_NAME)

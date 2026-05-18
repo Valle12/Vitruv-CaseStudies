@@ -95,7 +95,8 @@ class JavaConstructionSimulationTest extends AbstractJavaToUmlTest {
 	 * https://github.com/orhanobut/logger (12.5.2017)
 	 */
 	@Test
-	@IncompatibleFeatures(#["InterfacePrefix", "RealizationSuffix"])
+	@IncompatibleFeatures("InterfacePrefix")
+	@IncompatibleFeatures("RealizationSuffix")
 	def void testOrhanobutLoggerProject() {
 		registerStdLibraryModule("java.xml")
 		registerLocalLibrary(Path.of(new File("target/test-classes/dependencies/json.jar").absolutePath))

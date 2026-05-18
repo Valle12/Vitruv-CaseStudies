@@ -587,7 +587,9 @@ routine addJavaInterfacePrefix(uml::Interface umlInterface, uml::Package umlPack
 		check !javaInterface.name.startsWith("I")
 	}
 	update {
-		javaInterface.name = "I" + javaInterface.name
+		val newName = "I" + javaInterface.name
+		javaInterface.name = newName
+		umlInterface.name = newName
 		insertJavaClassifier(umlInterface, umlPackage)
 	}
 }

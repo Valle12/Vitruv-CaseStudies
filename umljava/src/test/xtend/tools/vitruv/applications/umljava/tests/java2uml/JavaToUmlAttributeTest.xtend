@@ -12,6 +12,10 @@ import tools.vitruv.applications.util.temporary.java.JavaVisibility
 
 import static org.hamcrest.CoreMatchers.*
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
+import static tools.vitruv.applications.testutility.integration.JavaElementsTestAssertions.assertJavaModifiableHasVisibility
+import static tools.vitruv.applications.testutility.integration.JavaElementsTestAssertions.assertJavaModifiableStatic
 import static tools.vitruv.applications.testutility.uml.UmlQueryUtil.loadUmlPrimitiveType
 import static tools.vitruv.applications.testutility.integration.UmlElementsTestAssertions.*
 import static tools.vitruv.applications.util.temporary.java.JavaMemberAndParameterUtil.*
@@ -265,6 +269,54 @@ class JavaToUmlAttributeTest extends AbstractJavaToUmlTest {
 					makePrivate
 				]
 			]
+		]
+	}
+
+	@Test
+	@RequiresFeatures("AccessorGeneration")
+	def void testJavaFieldGetsAccessorsAndPrivateVisibility() {
+		createJavaClassInRootPackage(CLASS_NAME)
+		changeJavaView [
+			claimJavaClass(CLASS_NAME) => [
+				members += MembersFactory.eINSTANCE.createField => [
+					name = ATTRIBUTE_NAME
+					typeReference = createJavaPrimitiveType(INT)
+					makePublic
+				]
+			]
+		]
+		validateJavaView [
+			val javaField = claimJavaClass(CLASS_NAME).claimField(ATTRIBUTE_NAME)
+			assertJavaModifiableHasVisibility(javaField, JavaVisibility.PRIVATE)
+			assertFalse(getJavaGettersOfAttribute(javaField).empty,
+				"a getter must exist after AccessorGeneration fires for an added Java field")
+			assertFalse(getJavaSettersOfAttribute(javaField).empty,
+				"a setter must exist after AccessorGeneration fires for an added Java field")
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["AccessorGeneration", "AttributeStaticCall"])
+	def void testJavaFieldMadeStaticMakesAccessorsStatic() {
+		createJavaClassInRootPackage(CLASS_NAME)
+		changeJavaView [
+			claimJavaClass(CLASS_NAME) => [
+				members += MembersFactory.eINSTANCE.createField => [
+					name = ATTRIBUTE_NAME
+					typeReference = createJavaPrimitiveType(INT)
+					makePublic
+				]
+			]
+		]
+		changeJavaView [
+			claimJavaClass(CLASS_NAME).claimField(ATTRIBUTE_NAME).static = true
+		]
+		validateJavaView [
+			val javaField = claimJavaClass(CLASS_NAME).claimField(ATTRIBUTE_NAME)
+			val getter = getJavaGettersOfAttribute(javaField).head
+			val setter = getJavaSettersOfAttribute(javaField).head
+			assertJavaModifiableStatic(getter, true)
+			assertJavaModifiableStatic(setter, true)
 		]
 	}
 

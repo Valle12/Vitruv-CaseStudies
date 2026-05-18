@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 
 import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
 import static org.junit.jupiter.api.Assertions.assertNull
 import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.applications.testutility.integration.JavaElementsTestAssertions.*
@@ -22,7 +23,6 @@ import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 /**
  * This class provides tests for basic class tests in the UML to Java direction
  */
-@RequiresFeatures("ClassCreation.Class")
 class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	static val PACKAGE_NAME = "rootpackage"
 	static val DEFAULT_CLASS_NAME = "TestClass"
@@ -32,12 +32,14 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	static val ADDITIONAL_INTERFACE_NAME = "AdditionalInterface"
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testCreateClass() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		assertSingleClassWithNameInRootPackage(DEFAULT_CLASS_NAME)
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testCreateClassInPackage() {
 		createClassInPackage(PACKAGE_NAME, DEFAULT_CLASS_NAME)
 		assertSingleClassWithNameInPackage(PACKAGE_NAME, DEFAULT_CLASS_NAME)
@@ -46,6 +48,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testDeleteClass() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		changeUmlModel [
@@ -57,6 +60,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 
 	@ParameterizedTest
 	@EnumSource(value=VisibilityKind, names=#["PUBLIC_LITERAL"], mode=EnumSource.Mode.EXCLUDE)
+	@RequiresFeatures("ClassCreation.Class")
 	def void testChangeClassVisibility(VisibilityKind visibility) {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		changeUmlModel [
@@ -70,6 +74,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testChangeAbstractClass() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		changeUmlModel [
@@ -83,6 +88,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testRenameClass() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		changeUmlModel [
@@ -93,6 +99,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testMoveClass() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		createPackageInRootPackage(PACKAGE_NAME)
@@ -110,6 +117,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testChangeFinalClass() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		changeUmlModel [
@@ -123,6 +131,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testSuperClassChanged() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		changeUmlModel [
@@ -156,7 +165,9 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	@IncompatibleFeatures("RealizationSuffix")
+	@IncompatibleFeatures("InterfacePrefix")
 	def void testAddClassImplements() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		createInterfaceInRootPackage(DEFAULT_INTERFACE_NAME)
@@ -172,7 +183,9 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	@IncompatibleFeatures("RealizationSuffix")
+	@IncompatibleFeatures("InterfacePrefix")
 	def void testDeleteClassImplements() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		createInterfaceInRootPackage(DEFAULT_INTERFACE_NAME)
@@ -196,7 +209,9 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	@IncompatibleFeatures("RealizationSuffix")
+	@IncompatibleFeatures("InterfacePrefix")
 	def void testChangeInterfaceImplementer() {
 		createClassInRootPackage(DEFAULT_CLASS_NAME)
 		createClassInRootPackage(ADDITIONAL_CLASS_NAME)
@@ -247,6 +262,71 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 		assertSingleDataTypeWithNameInPackage(PACKAGE_NAME, DEFAULT_CLASS_NAME)
 		assertNoClassifierWithNameInRootPackage(DEFAULT_CLASS_NAME)
 		assertNoClassifierExistsInRootPackage()
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "RealizationSuffix"])
+	@IncompatibleFeatures("InterfacePrefix")
+	def void testUmlRealizationCreatedAppendsSuffix() {
+		createClassInRootPackage(DEFAULT_CLASS_NAME)
+		createInterfaceInRootPackage(DEFAULT_INTERFACE_NAME)
+		changeUmlModel [
+			claimClass(DEFAULT_CLASS_NAME).createInterfaceRealization("Realization",
+				claimInterface(DEFAULT_INTERFACE_NAME))
+		]
+		validateUmlView [
+			val umlClass = defaultUmlModel.claimClass(DEFAULT_CLASS_NAME + "Impl")
+			assertEquals(DEFAULT_CLASS_NAME + "Impl", umlClass.name)
+		]
+		validateJavaView [
+			val javaClass = claimJavaClass(DEFAULT_CLASS_NAME + "Impl")
+			assertEquals(DEFAULT_CLASS_NAME + "Impl", javaClass.name)
+		]
+	}
+
+	@Test
+	@RequiresFeatures("ClassCreation.Interface")
+	def void testUmlClassBecomesJavaInterface() {
+		changeUmlModel [
+			packagedElements += UMLFactory.eINSTANCE.createClass => [
+				name = DEFAULT_CLASS_NAME
+				visibility = VisibilityKind.PUBLIC_LITERAL
+			]
+		]
+		validateJavaView [
+			assertTrue(javaInterfaces.exists[name == DEFAULT_CLASS_NAME],
+				"UML class must produce a Java interface when ClassCreation.Interface is active")
+			assertFalse(javaClasses.exists[name == DEFAULT_CLASS_NAME],
+				"no Java class must be produced when ClassCreation.Interface is active")
+		]
+	}
+
+	@Test
+	@RequiresFeatures("ClassCreation.Enum")
+	def void testUmlClassBecomesJavaEnum() {
+		changeUmlModel [
+			packagedElements += UMLFactory.eINSTANCE.createClass => [
+				name = DEFAULT_CLASS_NAME
+				visibility = VisibilityKind.PUBLIC_LITERAL
+			]
+		]
+		validateJavaView [
+			val javaEnum = claimJavaEnum(DEFAULT_CLASS_NAME)
+			assertEquals(DEFAULT_CLASS_NAME, javaEnum.name,
+				"UML class must produce a Java enum with the same name when ClassCreation.Enum is active")
+			assertFalse(javaClasses.exists[name == DEFAULT_CLASS_NAME],
+				"no Java class must be produced when ClassCreation.Enum is active")
+		]
+	}
+
+	@Test
+	@RequiresFeatures("DataTypeCreation.Record")
+	def void testUmlDataTypeBecomesFinalJavaClass() {
+		createDataTypeInRootPackage(DEFAULT_CLASS_NAME)
+		validateJavaView [
+			val javaClass = claimJavaClass(DEFAULT_CLASS_NAME)
+			assertJavaModifiableFinal(javaClass, true)
+		]
 	}
 
 	static class BidirectionalTest extends UmlToJavaClassTest {

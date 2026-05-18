@@ -4,11 +4,16 @@ import org.junit.jupiter.api.Test
 
 import static org.hamcrest.CoreMatchers.is
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
 import static tools.vitruv.applications.testutility.integration.JavaUmlElementEqualityValidation.assertElementsEqual
 import static tools.vitruv.applications.util.temporary.java.JavaTypeUtil.*
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
+import org.eclipse.uml2.uml.UMLFactory
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * This class contains tests that deal with changes with interfaces.
@@ -75,6 +80,7 @@ class UmlToJavaInterfaceTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@IncompatibleFeatures("InterfacePrefix")
 	def void testAddSuperInterface() {
 		createInterfaceInRootPackage(INTERFACE_NAME)
 		createInterfaceInRootPackage(SUPER_INTERFACE_NAME_1)
@@ -101,6 +107,7 @@ class UmlToJavaInterfaceTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@IncompatibleFeatures("InterfacePrefix")
 	def void testRemoveSuperInterface() {
 		createInterfaceInRootPackage(INTERFACE_NAME)
 		createInterfaceInRootPackage(SUPER_INTERFACE_NAME_1)
@@ -126,6 +133,41 @@ class UmlToJavaInterfaceTest extends AbstractUmlToJavaTest {
 			val umlSuperInterface2 = defaultUmlModel.claimInterface(SUPER_INTERFACE_NAME_2)
 			assertThat("there must be one super interface", javaInterface.extends.size, is(1))
 			assertElementsEqual(umlSuperInterface2, getClassifierFromTypeReference(javaInterface.extends.get(0)))
+		]
+	}
+
+	@Test
+	@RequiresFeatures("InterfacePrefix")
+	def void testUmlInterfaceTriggersJavaPrefix() {
+		// Use a name that doesn't already start with 'I' so the reaction's guard fires.
+		val unprefixedName = "Foo"
+		changeUmlModel [
+			packagedElements += UMLFactory.eINSTANCE.createInterface => [
+				name = unprefixedName
+			]
+		]
+		validateJavaView [
+			val prefixed = claimJavaInterface("I" + unprefixedName)
+			assertEquals("I" + unprefixedName, prefixed.name)
+			assertFalse(javaInterfaces.exists[name == unprefixedName],
+				"the unprefixed Java interface must not exist when InterfacePrefix is active")
+		]
+	}
+
+	@Test
+	@IncompatibleFeatures("InterfacePrefix")
+	def void testUmlInterfaceDoesNotTriggerJavaPrefix() {
+		val unprefixedName = "Foo"
+		changeUmlModel [
+			packagedElements += UMLFactory.eINSTANCE.createInterface => [
+				name = unprefixedName
+			]
+		]
+		validateJavaView [
+			val unprefixed = claimJavaInterface(unprefixedName)
+			assertEquals(unprefixedName, unprefixed.name)
+			assertFalse(javaInterfaces.exists[name == "I" + unprefixedName],
+				"the I-prefixed Java interface must not exist when InterfacePrefix is inactive")
 		]
 	}
 

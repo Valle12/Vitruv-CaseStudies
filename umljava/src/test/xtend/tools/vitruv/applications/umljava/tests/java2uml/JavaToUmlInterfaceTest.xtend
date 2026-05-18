@@ -10,7 +10,11 @@ import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
 import static extension tools.vitruv.applications.util.temporary.java.JavaContainerAndClassifierUtil.*
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
+
 import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
+import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 
 /**
  * A Test class for interface tests. Checks their creation, renaming, deleting and the 
@@ -165,6 +169,34 @@ class JavaToUmlInterfaceTest extends AbstractJavaToUmlTest {
 			val umlSuperInterface2 = defaultUmlModel.claimInterface(SUPER_INTERFACE2_NAME)
 			assertUmlClassifierHasSuperClassifier(umlInterface, umlSuperInterface2)
 			assertUmlClassifierDontHaveSuperClassifier(umlInterface, umlSuperInterface1)
+		]
+	}
+
+	@Test
+	@RequiresFeatures("InterfacePrefix")
+	def void testJavaInterfaceGetsIPrefix() {
+		// Use a name that doesn't already start with 'I' so the reaction's
+		// !startsWith("I") guard lets it run.
+		val unprefixedName = "Foo"
+		createJavaInterfaceInRootPackage(unprefixedName)
+		validateJavaView [
+			val prefixed = claimJavaInterface("I" + unprefixedName)
+			assertEquals("I" + unprefixedName, prefixed.name)
+			assertFalse(javaInterfaces.exists[name == unprefixedName],
+				"the unprefixed Java interface must not exist when InterfacePrefix is active")
+		]
+	}
+
+	@Test
+	@IncompatibleFeatures("InterfacePrefix")
+	def void testJavaInterfaceKeepsOriginalName() {
+		val unprefixedName = "Foo"
+		createJavaInterfaceInRootPackage(unprefixedName)
+		validateJavaView [
+			val unprefixed = claimJavaInterface(unprefixedName)
+			assertEquals(unprefixedName, unprefixed.name)
+			assertFalse(javaInterfaces.exists[name == "I" + unprefixedName],
+				"the I-prefixed Java interface must not exist when InterfacePrefix is inactive")
 		]
 	}
 

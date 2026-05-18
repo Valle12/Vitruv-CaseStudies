@@ -9,6 +9,9 @@ import tools.vitruv.applications.util.temporary.java.JavaVisibility
 
 import static org.hamcrest.CoreMatchers.*
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertFalse
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.applications.testutility.integration.UmlElementsTestAssertions.*
 import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.*
 import static tools.vitruv.applications.util.temporary.java.JavaModifierUtil.getUmlVisibilityKindFromJavaVisibilityConstant
@@ -23,7 +26,6 @@ import tools.vitruv.applications.umljava.tests.util.conditional.RequiresFeatures
 /**
  * A Test class to test classes and their traits.
  */
-@RequiresFeatures("ClassCreation.Class")
 class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	static val PACKAGE_NAME = "packagename"
 	static val CLASS_NAME = "ClassName"
@@ -36,6 +38,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests if a corresponding Java class is created when a UML class is created.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testCreateClass() {
 		createJavaClassInRootPackage(CLASS_NAME)
 		assertSingleClassWithNameInRootPackage(CLASS_NAME)
@@ -49,6 +52,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests if a corresponding Java class is created when a UML class is created within a package.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testCreateClassInPackage() {
 		createJavaPackageInRootPackage(PACKAGE_NAME)
 		createJavaClassInPackage(#[PACKAGE_NAME], CLASS_NAME)
@@ -66,6 +70,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests if renaming a java class also renames the corresponding UML class.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testRenameClass() {
 		createJavaClassInRootPackage(CLASS_NAME)
 		changeJavaView [
@@ -86,6 +91,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests if moving a Java class leads to the movement of the corresponding UML class.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testMoveClass() {
 		createJavaPackageInRootPackage(PACKAGE_NAME)
 		createJavaClassInRootPackage(CLASS_NAME)
@@ -156,6 +162,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 */
 	@ParameterizedTest
 	@EnumSource(value=JavaVisibility, names=#["PACKAGE"], mode=EnumSource.Mode.EXCLUDE)
+	@RequiresFeatures("ClassCreation.Class")
 	def void testChangeClassVisibility(JavaVisibility visibility) {
 		createJavaClassInRootPackage(CLASS_NAME)
 		changeAndCheckPropertyOfClass(CLASS_NAME, [javaVisibilityModifier = visibility], [
@@ -171,6 +178,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests the change of the abstract value in UML.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testChangeAbstractClass() {
 		createJavaClassInRootPackage(CLASS_NAME)
 		changeAndCheckPropertyOfClass(CLASS_NAME, [abstract = true], [
@@ -186,6 +194,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * causes the correct change in the Uml class.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testChangeFinalClass() {
 		createJavaClassInRootPackage(CLASS_NAME)
 		changeAndCheckPropertyOfClass(CLASS_NAME, [final = true], [
@@ -200,6 +209,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests if add a super class is correctly reflected on the UML side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testSuperClassChanged() {
 		createJavaClassInRootPackage(CLASS_NAME)
 		createJavaClassInRootPackage(SUPER_CLASS_NAME)
@@ -222,6 +232,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests if removing a super class is reflected on the UML side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	def void testRemoveSuperClass() {
 		createJavaClassInRootPackage(CLASS_NAME)
 		createJavaClassInRootPackage(SUPER_CLASS_NAME)
@@ -248,6 +259,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Check the creation of an interface implementation on the UML side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	@IncompatibleFeatures("RealizationSuffix")
 	def void testAddClassImplement() {
 		createJavaClassInRootPackage(CLASS_NAME)
@@ -270,6 +282,7 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 	 * Tests if removing an implementation relation is correctly reflected on the UML side.
 	 */
 	@Test
+	@RequiresFeatures("ClassCreation.Class")
 	@IncompatibleFeatures("RealizationSuffix")
 	def void testRemoveClassImplement() {
 		createJavaClassInRootPackage(CLASS_NAME)
@@ -303,6 +316,70 @@ class JavaToUmlClassTest extends AbstractJavaToUmlTest {
 			val umlSecondInterface = defaultUmlModel.claimInterface(INTERFACE_NAME2)
 			assertUmlClassDontHaveImplement(umlClass, umlFirstInterface)
 			assertUmlClassHasImplement(umlClass, umlSecondInterface)
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "RealizationSuffix"])
+	def void testRealizationSuffixAppendedOnImplements() {
+		createJavaClassInRootPackage(CLASS_NAME)
+		createJavaInterfaceInRootPackage(INTERFACE_NAME)
+		changeJavaView [
+			val javaInterface = claimJavaInterface(INTERFACE_NAME)
+			claimJavaClass(CLASS_NAME) => [
+				implements += createNamespaceClassifierReference(javaInterface)
+			]
+		]
+		validateUmlView [
+			val umlClass = defaultUmlModel.claimClass(CLASS_NAME + "Impl")
+			assertEquals(CLASS_NAME + "Impl", umlClass.name)
+		]
+		validateJavaView [
+			val javaClass = claimJavaClass(CLASS_NAME + "Impl")
+			assertEquals(CLASS_NAME + "Impl", javaClass.name)
+		]
+	}
+
+	@Test
+	@RequiresFeatures("ClassCreation.Interface")
+	def void testJavaClassBecomesUmlInterface() {
+		createJavaClassInRootPackage(CLASS_NAME)
+		validateUmlView [
+			assertTrue(defaultUmlModel.packagedElements.exists [
+				it instanceof org.eclipse.uml2.uml.Interface && (it as org.eclipse.uml2.uml.Interface).name == CLASS_NAME
+			], "Java class must produce a UML interface when ClassCreation.Interface is active")
+			assertFalse(defaultUmlModel.packagedElements.exists [
+				it instanceof org.eclipse.uml2.uml.Class && (it as org.eclipse.uml2.uml.Class).name == CLASS_NAME
+			], "no UML class must be produced when ClassCreation.Interface is active")
+		]
+	}
+
+	@Test
+	@RequiresFeatures("ClassCreation.Enum")
+	def void testJavaClassBecomesUmlEnum() {
+		createJavaClassInRootPackage(CLASS_NAME)
+		validateUmlView [
+			val umlEnum = defaultUmlModel.claimEnum(CLASS_NAME)
+			assertEquals(CLASS_NAME, umlEnum.name)
+			assertFalse(defaultUmlModel.packagedElements.exists [
+				it instanceof org.eclipse.uml2.uml.Class && (it as org.eclipse.uml2.uml.Class).name == CLASS_NAME
+			], "no UML class must be produced when ClassCreation.Enum is active")
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "ConstructorCreation"])
+	def void testJavaConstructorAddedOnClassCreation() {
+		createJavaClassInRootPackage(CLASS_NAME)
+		validateJavaView [
+			val javaClass = claimJavaClass(CLASS_NAME)
+			assertFalse(javaClass.members.filter(org.emftext.language.java.members.Constructor).empty,
+				"a default constructor must be added on the Java side when ConstructorCreation is active")
+		]
+		validateUmlView [
+			val umlClass = defaultUmlModel.claimClass(CLASS_NAME)
+			assertFalse(umlClass.ownedOperations.filter[name == CLASS_NAME].empty,
+				"a corresponding constructor operation must be added on the UML side when ConstructorCreation is active")
 		]
 	}
 

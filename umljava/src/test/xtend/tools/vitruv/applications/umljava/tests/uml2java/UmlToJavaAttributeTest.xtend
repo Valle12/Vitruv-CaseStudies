@@ -7,6 +7,9 @@ import org.eclipse.uml2.uml.Type
 import org.eclipse.uml2.uml.UMLFactory
 import org.eclipse.uml2.uml.VisibilityKind
 import org.emftext.language.java.members.Field
+import org.emftext.language.java.parameters.Parameter
+import org.emftext.language.java.references.IdentifierReference
+import org.emftext.language.java.statements.ExpressionStatement
 import org.emftext.language.java.types.TypesFactory
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -15,11 +18,16 @@ import tools.vitruv.applications.util.temporary.java.JavaVisibility
 
 import static org.hamcrest.CoreMatchers.*
 import static org.hamcrest.MatcherAssert.assertThat
+import static org.junit.jupiter.api.Assertions.assertEquals
+import static org.junit.jupiter.api.Assertions.assertTrue
 import static tools.vitruv.applications.testutility.integration.JavaElementsTestAssertions.*
+import tools.vitruv.applications.umljava.tests.util.conditional.IncompatibleFeatures
 import static tools.vitruv.applications.testutility.integration.UmlElementsTestAssertions.assertUmlClassDontHaveOperation
 import static tools.vitruv.applications.util.temporary.java.JavaMemberAndParameterUtil.*
 import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.*
 import static tools.vitruv.applications.util.temporary.java.JavaModifierUtil.getJavaVisibilityConstantFromUmlVisibilityKind
+import static tools.vitruv.applications.util.temporary.java.JavaStatementUtil.createIdentifierReference
+import static tools.vitruv.applications.util.temporary.java.JavaStatementUtil.wrapExpressionInExpressionStatement
 
 import static extension tools.vitruv.applications.testutility.uml.UmlQueryUtil.*
 import static extension tools.vitruv.applications.umljava.tests.util.JavaQueryUtil.*
@@ -195,6 +203,123 @@ class UmlToJavaAttributeTest extends AbstractUmlToJavaTest {
 				getJavaGettersOfAttribute(javaAttribute).toSet, is(not(emptySet)))
 			assertThat("there must be a setter for the attribute " + javaAttribute,
 				getJavaSettersOfAttribute(javaAttribute).toSet, is(not(emptySet)))
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "AccessorGeneration"])
+	def void testAccessorGenerationMakesFieldPrivate() {
+		createClassInRootPackage(CLASS_NAME)
+		val primitiveType = loadIntegerPrimitiveType()
+		changeUmlModel [
+			claimClass(CLASS_NAME) => [
+				ownedAttributes += UMLFactory.eINSTANCE.createProperty => [
+					name = ATTRIBUTE_NAME
+					type = primitiveType
+				]
+			]
+		]
+		validateJavaView [
+			val javaAttribute = claimJavaClass(CLASS_NAME).claimField(ATTRIBUTE_NAME)
+			assertJavaModifiableHasVisibility(javaAttribute, JavaVisibility.PRIVATE)
+		]
+	}
+
+	@Test
+	@RequiresFeatures("ClassCreation.Class")
+	@IncompatibleFeatures("AccessorGeneration")
+	def void testFieldStaysPublicWhenAccessorGenerationInactive() {
+		createClassInRootPackage(CLASS_NAME)
+		val primitiveType = loadIntegerPrimitiveType()
+		changeUmlModel [
+			claimClass(CLASS_NAME) => [
+				ownedAttributes += UMLFactory.eINSTANCE.createProperty => [
+					name = ATTRIBUTE_NAME
+					type = primitiveType
+				]
+			]
+		]
+		validateJavaView [
+			val javaAttribute = claimJavaClass(CLASS_NAME).claimField(ATTRIBUTE_NAME)
+			assertJavaModifiableHasVisibility(javaAttribute, JavaVisibility.PUBLIC)
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "AttributeStaticCall"])
+	def void testAttributeStaticCallRewritesCrossClassReceiver() {
+		val ownerName = "OwnerClass"
+		val callerName = "CallerClass"
+		val fieldName = "myField"
+		val methodName = "useField"
+		val paramName = "owner"
+
+		val intType = loadIntegerPrimitiveType()
+		createClassInRootPackage(ownerName)
+		changeUmlModel [
+			claimClass(ownerName) => [
+				ownedAttributes += UMLFactory.eINSTANCE.createProperty => [
+					name = fieldName
+					type = intType
+				]
+			]
+		]
+		createClassInRootPackage(callerName)
+		changeUmlModel [
+			val ownerUml = claimClass(ownerName)
+			claimClass(callerName) => [
+				createOwnedOperation(methodName, null, null, null) => [
+					createOwnedParameter(paramName, ownerUml)
+				]
+			]
+		]
+
+		// Inject a method body `owner.myField;` so the rewrite has an instance receiver to fix up.
+		changeJavaView [
+			val javaField = claimJavaClass(ownerName).claimField(fieldName)
+			claimJavaClass(callerName).claimClassMethod(methodName) => [
+				val javaParam = claimParameter(paramName)
+				val paramRef = createIdentifierReference(javaParam)
+				paramRef.setNext(createIdentifierReference(javaField))
+				statements += wrapExpressionInExpressionStatement(paramRef)
+			]
+		]
+		validateJavaView [
+			val expr = ((claimJavaClass(callerName).claimClassMethod(methodName).statements.head
+				as ExpressionStatement).expression) as IdentifierReference
+			assertTrue(expr.target instanceof Parameter,
+				"Sanity: before isStatic=true the receiver should still be the parameter")
+		]
+
+		changeUmlModel [
+			claimClass(ownerName).claimAttribute(fieldName) => [
+				isStatic = true
+			]
+		]
+
+		validateJavaView [
+			val javaOwner = claimJavaClass(ownerName)
+			val expr = ((claimJavaClass(callerName).claimClassMethod(methodName).statements.head
+				as ExpressionStatement).expression) as IdentifierReference
+			assertEquals(javaOwner, expr.target,
+				"After AttributeStaticCall, the instance receiver must be rewritten to the owner Java class")
+		]
+	}
+
+	@Test
+	@RequiresFeatures(#["ClassCreation.Class", "AttributeStaticCall"])
+	def void testAttributeStaticCallMakesAccessorsStatic() {
+		createClassWithFieldOfType(CLASS_NAME, ATTRIBUTE_NAME, loadIntegerPrimitiveType())
+		changeAttribute(CLASS_NAME, ATTRIBUTE_NAME) [ attribute |
+			attribute.isStatic = true
+		]
+		validateJavaView [
+			val javaClass = claimJavaClass(CLASS_NAME)
+			val javaField = javaClass.claimField(ATTRIBUTE_NAME)
+			val getter = getJavaGettersOfAttribute(javaField).head
+			val setter = getJavaSettersOfAttribute(javaField).head
+			assertJavaModifiableStatic(getter, true)
+			assertJavaModifiableStatic(setter, true)
 		]
 	}
 

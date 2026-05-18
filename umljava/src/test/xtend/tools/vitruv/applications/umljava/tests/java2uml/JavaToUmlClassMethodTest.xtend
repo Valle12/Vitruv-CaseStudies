@@ -13,6 +13,8 @@ import tools.vitruv.applications.util.temporary.java.JavaStandardType
 import tools.vitruv.applications.util.temporary.java.JavaVisibility
 import tools.vitruv.framework.views.View
 
+import static org.junit.jupiter.api.Assertions.assertTrue
+import static tools.vitruv.applications.testutility.integration.JavaElementsTestAssertions.assertJavaModifiableFinal
 import static tools.vitruv.applications.testutility.integration.UmlElementsTestAssertions.*
 import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.*
 import static tools.vitruv.applications.util.temporary.java.JavaStandardType.*
@@ -337,6 +339,23 @@ class JavaToUmlClassMethodTest extends AbstractJavaToUmlTest {
 					changeFunction.apply(view, it)
 				]
 			]
+		]
+	}
+
+	@Test
+	@RequiresFeatures("MethodStaticCall")
+	def void testJavaMethodMadeStaticBecomesFinal() {
+		createJavaClassWithMethod(CLASS_NAME, OPERATION_NAME)
+		changeClassMethod(CLASS_NAME, OPERATION_NAME) [
+			static = true
+		]
+		validateJavaView [
+			val javaMethod = claimJavaClass(CLASS_NAME).claimClassMethod(OPERATION_NAME)
+			assertJavaModifiableFinal(javaMethod, true)
+		]
+		validateUmlView [
+			val umlOperation = defaultUmlModel.claimClass(CLASS_NAME).claimOperation(OPERATION_NAME)
+			assertTrue(umlOperation.isLeaf, "UML operation must be marked leaf (final) when MethodStaticCall fires")
 		]
 	}
 

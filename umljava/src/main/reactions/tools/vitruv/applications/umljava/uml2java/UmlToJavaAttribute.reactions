@@ -1,4 +1,6 @@
+import org.eclipse.uml2.uml.Enumeration
 import org.eclipse.uml2.uml.Property
+import org.eclipse.uml2.uml.VisibilityKind
 import org.emftext.language.java.members.ClassMethod
 import org.emftext.language.java.members.Field
 import tools.vitruv.applications.util.temporary.java.UmlJavaCorrespondenceTag
@@ -88,6 +90,7 @@ reaction UmlPropertyInsertedInClassEnforceAccessorGeneration {
 @feature(type = "AccessorGeneration")
 reaction UmlPropertyInsertedInDataTypeEnforceAccessorGeneration {
 	after element uml::Property inserted in uml::DataType[ownedAttribute]
+	with !(affectedEObject instanceof Enumeration)
 	call enforceAccessorGeneration(newValue, affectedEObject)
 }
 
@@ -98,6 +101,7 @@ routine enforceAccessorGeneration(uml::Property umlProperty, uml::Classifier uml
 	}
 	update {
 		javaField.makePrivate
+		umlProperty.visibility = VisibilityKind.PRIVATE_LITERAL
 		createOrFindJavaGetter(umlProperty, javaField)
 		createOrFindJavaSetter(umlProperty, javaField)
 		insertAccessorsIntoClassifier(umlProperty, javaClassifier)
