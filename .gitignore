@@ -6,6 +6,9 @@ target/
 *.log
 .mvn/wrapper/*.jar
 
+# Vitruv-generated reactions/routines sources
+src-gen/
+
 # Eclipse
 META-INF
 build.properties
