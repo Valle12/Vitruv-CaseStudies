@@ -76,6 +76,7 @@ routine createUmlAttributeInEnum(java::Enumeration jEnum, java::Field jAttr) {
 	}
 	update {
 		uAttr.name = jAttr.name
+		uAttr.visibility = getUmlVisibilityKindFromJavaElement(jAttr)
 		addCorrespondenceBetween(uAttr, jAttr)
 		uEnum.ownedAttributes += uAttr
 	}
@@ -91,6 +92,7 @@ routine createUmlAttributeInClass(java::Class jClass, java::Field jAttr) {
 	}
 	update {
 		uAttr.name = jAttr.name;
+		uAttr.visibility = getUmlVisibilityKindFromJavaElement(jAttr)
 		addCorrespondenceBetween(uAttr, jAttr)
 		uClass.ownedAttributes += uAttr
 	}
