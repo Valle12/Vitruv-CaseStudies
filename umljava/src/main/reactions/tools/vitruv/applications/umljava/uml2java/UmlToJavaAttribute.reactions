@@ -111,6 +111,8 @@ routine createJavaInterfaceField(uml::Property umlProperty) {
 		javaField.makePublic
 		javaField.static = true
 		javaField.final = true
+		umlProperty.isReadOnly = true
+		umlProperty.isStatic = true
 		addCorrespondenceBetween(umlProperty, javaField)
 	}
 }

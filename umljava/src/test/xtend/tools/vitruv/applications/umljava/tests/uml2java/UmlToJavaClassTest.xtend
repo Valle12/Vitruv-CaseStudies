@@ -303,8 +303,7 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 
 	@Test
 	@RequiresFeatures("ClassCreation.Interface")
-	def void testPropertyOnClassRealizedAsInterfaceCreatesNoJavaField() {
-		userInteraction.acknowledgeNotification[true]
+	def void testPropertyOnClassRealizedAsInterfaceCreatesConstantJavaField() {
 		changeUmlModel [
 			packagedElements += UMLFactory.eINSTANCE.createClass => [
 				name = DEFAULT_CLASS_NAME
@@ -317,8 +316,9 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 		]
 		validateJavaView [
 			val javaInterface = claimJavaInterface(DEFAULT_CLASS_NAME)
-			assertTrue(javaInterface.fields.filter[name == "someAttribute"].empty,
-				"a property on a class realized as a Java interface must not produce a Java field")
+			val javaField = javaInterface.claimField("someAttribute")
+			assertJavaModifiableStatic(javaField, true)
+			assertJavaModifiableFinal(javaField, true)
 		]
 	}
 
