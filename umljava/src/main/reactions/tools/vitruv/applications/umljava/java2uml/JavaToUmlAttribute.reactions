@@ -1,5 +1,4 @@
 import tools.vitruv.applications.util.temporary.java.UmlJavaCorrespondenceTag
-import static tools.vitruv.applications.util.temporary.java.CommonUtil.showMessage
 import static tools.vitruv.applications.util.temporary.java.JavaMemberAndParameterUtil.*
 import static tools.vitruv.applications.util.temporary.java.JavaModificationUtil.rewriteFieldAccessToStaticCall
 import static extension edu.kit.ipd.sdq.commons.util.java.lang.IterableUtil.claimNotMany
@@ -24,6 +23,12 @@ reaction JavaAttributeCreatedInClass {
 reaction JavaAttributeCreatedInEnum {
 	after element java::Field inserted in java::Enumeration[members]
 	call createOrFindUmlAttributeInEnum(affectedEObject, newValue)
+}
+
+@feature(type = "AttributeCreation")
+reaction JavaAttributeCreatedInInterface {
+	after element java::Field inserted in java::Interface[members]
+	call createOrFindUmlAttributeInInterface(affectedEObject, newValue)
 }
 
 routine addAttributeCorrespondence(uml::Property umlAttribute, java::Field javaField) {
@@ -64,6 +69,21 @@ routine createOrFindUmlAttributeInClass(java::Class javaClass, java::Field javaF
 	}
 }
 
+routine createOrFindUmlAttributeInInterface(java::Interface javaInterface, java::Field javaField) {
+	match {
+		val umlInterface = retrieve uml::Interface corresponding to javaInterface
+		require absence of uml::Property corresponding to javaField
+	}
+	update {
+		val foundAttribute = umlInterface.ownedAttributes.filter[name == javaField.name].claimNotMany
+		if (foundAttribute === null) {
+			createUmlAttributeInInterface(javaInterface, javaField)
+		} else {
+			addAttributeCorrespondence(foundAttribute, javaField)
+		}
+	}
+}
+
 //UML-Enumeration, UML-Class don't have a common superclass for "having ownedAttributes".
 //Therefore we implemented two separate routines
 routine createUmlAttributeInEnum(java::Enumeration jEnum, java::Field jAttr) {
@@ -95,6 +115,22 @@ routine createUmlAttributeInClass(java::Class jClass, java::Field jAttr) {
 		uAttr.visibility = getUmlVisibilityKindFromJavaElement(jAttr)
 		addCorrespondenceBetween(uAttr, jAttr)
 		uClass.ownedAttributes += uAttr
+	}
+}
+
+routine createUmlAttributeInInterface(java::Interface jInterface, java::Field jAttr) {
+	match {
+		val uInterface = retrieve uml::Interface corresponding to jInterface
+		require absence of uml::Property corresponding to jAttr
+	}
+	create {
+		val uAttr = new uml::Property
+	}
+	update {
+		uAttr.name = jAttr.name
+		uAttr.visibility = getUmlVisibilityKindFromJavaElement(jAttr)
+		addCorrespondenceBetween(uAttr, jAttr)
+		uInterface.ownedAttributes += uAttr
 	}
 }
 
@@ -314,12 +350,3 @@ routine setUmlAttributeFinal(java::Field jAttr, Boolean isFinal) {
 	}
 }
 
-//===========================================
-//=========================================== Unsupported
-//===========================================
-@feature(type = "InterfaceConstraints")
-reaction JavaAttributeCreatedInInterface {
-	after element java::Field inserted in java::Interface[members]
-	call showMessage(userInteractor,
-		"Adding fields to " + affectedEObject.class.simpleName + " is not supported. Please remove " + newValue)
-}

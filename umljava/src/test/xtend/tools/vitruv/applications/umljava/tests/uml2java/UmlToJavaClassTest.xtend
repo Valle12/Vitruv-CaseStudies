@@ -302,6 +302,27 @@ class UmlToJavaClassTest extends AbstractUmlToJavaTest {
 	}
 
 	@Test
+	@RequiresFeatures("ClassCreation.Interface")
+	def void testPropertyOnClassRealizedAsInterfaceCreatesNoJavaField() {
+		userInteraction.acknowledgeNotification[true]
+		changeUmlModel [
+			packagedElements += UMLFactory.eINSTANCE.createClass => [
+				name = DEFAULT_CLASS_NAME
+				visibility = VisibilityKind.PUBLIC_LITERAL
+				ownedAttributes += UMLFactory.eINSTANCE.createProperty => [
+					name = "someAttribute"
+					visibility = VisibilityKind.PUBLIC_LITERAL
+				]
+			]
+		]
+		validateJavaView [
+			val javaInterface = claimJavaInterface(DEFAULT_CLASS_NAME)
+			assertTrue(javaInterface.fields.filter[name == "someAttribute"].empty,
+				"a property on a class realized as a Java interface must not produce a Java field")
+		]
+	}
+
+	@Test
 	@RequiresFeatures("ClassCreation.Enum")
 	def void testUmlClassBecomesJavaEnum() {
 		changeUmlModel [

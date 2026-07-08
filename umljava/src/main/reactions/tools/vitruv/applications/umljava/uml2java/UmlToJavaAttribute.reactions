@@ -39,26 +39,44 @@ reaction UmlPropertyInsertedInDataType {
 	}
 }
 
+@feature(type = "AttributeCreation")
+reaction UmlPropertyInsertedInInterface {
+	after element uml::Property inserted in uml::Interface[ownedAttribute]
+	call {
+		createOrFindJavaField(newValue, affectedEObject)
+		insertJavaField(newValue, affectedEObject)
+	}
+}
+
 routine createOrFindJavaField(uml::Property umlProperty, uml::Classifier umlClassifier) {
 	match {
 		val jClassifier = retrieve java::ConcreteClassifier corresponding to umlClassifier
 		require absence of java::Field corresponding to umlProperty
 	}
 	update {
-		val foundField = jClassifier.members.filter(Field).filter[name == umlProperty.name].claimNotMany
-		if (foundField === null) {
-			createJavaField(umlProperty)
-		} else {
-			addAttributeCorrespondence(umlProperty, foundField)
-			val getter = jClassifier.methods.filter(ClassMethod).filter[name == buildGetterName(umlProperty.name)].
-				claimNotMany
-			val setter = jClassifier.methods.filter(ClassMethod).filter[name == buildSetterName(umlProperty.name)].
-				claimNotMany
-			if (getter !== null) {
-				createAccessorCorrespondence(umlProperty, getter, UmlJavaCorrespondenceTag.GETTER)
+		if (jClassifier instanceof org.emftext.language.java.classifiers.Interface) {
+			val foundField = jClassifier.members.filter(Field).filter[name == umlProperty.name].claimNotMany
+			if (foundField === null) {
+				createJavaInterfaceField(umlProperty)
+			} else {
+				addAttributeCorrespondence(umlProperty, foundField)
 			}
-			if (setter !== null) {
-				createAccessorCorrespondence(umlProperty, setter, UmlJavaCorrespondenceTag.SETTER)
+		} else {
+			val foundField = jClassifier.members.filter(Field).filter[name == umlProperty.name].claimNotMany
+			if (foundField === null) {
+				createJavaField(umlProperty)
+			} else {
+				addAttributeCorrespondence(umlProperty, foundField)
+				val getter = jClassifier.methods.filter(ClassMethod).filter[name == buildGetterName(umlProperty.name)].
+					claimNotMany
+				val setter = jClassifier.methods.filter(ClassMethod).filter[name == buildSetterName(umlProperty.name)].
+					claimNotMany
+				if (getter !== null) {
+					createAccessorCorrespondence(umlProperty, getter, UmlJavaCorrespondenceTag.GETTER)
+				}
+				if (setter !== null) {
+					createAccessorCorrespondence(umlProperty, setter, UmlJavaCorrespondenceTag.SETTER)
+				}
 			}
 		}
 		changeJavaAttributeType(umlProperty)
@@ -78,6 +96,22 @@ routine createJavaField(uml::Property umlProperty) {
 		addCorrespondenceBetween(umlProperty, javaField)
 		createOrFindJavaGetter(umlProperty, javaField)
 		createOrFindJavaSetter(umlProperty, javaField)
+	}
+}
+
+routine createJavaInterfaceField(uml::Property umlProperty) {
+	match {
+		require absence of java::Field corresponding to umlProperty
+	}
+	create {
+		val javaField = new java::Field
+	}
+	update {
+		javaField.name = umlProperty.name
+		javaField.makePublic
+		javaField.static = true
+		javaField.final = true
+		addCorrespondenceBetween(umlProperty, javaField)
 	}
 }
 
@@ -315,13 +349,6 @@ routine renameJavaAttribute(String newName, String oldName, uml::Property uAttri
 		jGetter.ifPresent[renameGetterOfAttribute(it, jAttribute)]
 		jSetter.ifPresent[renameSetter(it, jAttribute, oldName)]
 	}
-}
-
-@feature(type = "InterfaceConstraints")
-reaction UmlAttributeCreatedInInterface {
-	after element uml::Property inserted in uml::Interface[ownedAttribute]
-	call showMessage(userInteractor,
-		"We do not support adding attributes to interfaces. Please delete " + newValue + " from " + affectedEObject)
 }
 
 @feature(type = "InterfaceConstraints")
