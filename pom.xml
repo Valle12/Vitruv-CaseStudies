@@ -9,7 +9,7 @@
   <parent>
     <groupId>tools.vitruv</groupId>
     <artifactId>parent</artifactId>
-    <version>3.3.2</version>
+    <version>4.0.0</version>
   </parent>
 
   <!-- Project Information -->
@@ -31,7 +31,6 @@
     <module>simulinkautosar</module>
     <module>testutility</module>
     <module>testutility.integration</module>
-    <module>transitivechange</module>
     <module>p2-wrapper</module>
   </modules>
 
@@ -48,8 +47,9 @@
 
   <!-- Dependency Management -->
   <properties>
-    <vitruv.version>3.2.4-SNAPSHOT</vitruv.version>
-    <xtend.version>2.42.0</xtend.version>
+    <vitruv.version>4.1.0-SNAPSHOT</vitruv.version>
+    <vitruv-framework.version>4.0.0</vitruv-framework.version>
+    <xtend.version>2.43.0</xtend.version>
     <!-- p2 updatesite versions -->
     <repo.sdq-demo-metamodels.version>1.9.0</repo.sdq-demo-metamodels.version>
     <repo.sdq-commons.version>2.2.0</repo.sdq-commons.version>
@@ -68,9 +68,9 @@
     </repository>
     <!-- allow snapshots -->
     <repository>
-      <id>ossrh-snapshots</id>
-      <name>OSSRH Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <id>central-portal-snapshots</id>
+      <name>Central Portal Snapshots</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -203,27 +203,22 @@
       <dependency>
         <groupId>tools.vitruv</groupId>
         <artifactId>tools.vitruv.framework.applications</artifactId>
-        <version>${vitruv.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>tools.vitruv</groupId>
-        <artifactId>tools.vitruv.framework.testutils.deprecated</artifactId>
-        <version>3.2.3</version>
+        <version>${vitruv-framework.version}</version>
       </dependency>
       <dependency>
         <groupId>tools.vitruv</groupId>
         <artifactId>tools.vitruv.framework.testutils.integration</artifactId>
-        <version>${vitruv.version}</version>
+        <version>${vitruv-framework.version}</version>
       </dependency>
       <dependency>
         <groupId>tools.vitruv</groupId>
         <artifactId>tools.vitruv.framework.views</artifactId>
-        <version>${vitruv.version}</version>
+        <version>${vitruv-framework.version}</version>
       </dependency>
       <dependency>
         <groupId>tools.vitruv</groupId>
         <artifactId>tools.vitruv.framework.vsum</artifactId>
-        <version>${vitruv.version}</version>
+        <version>${vitruv-framework.version}</version>
       </dependency>
 
       <!-- external dependencies -->
@@ -260,7 +255,7 @@
       <dependency>
         <groupId>org.eclipse.platform</groupId>
         <artifactId>org.eclipse.equinox.common</artifactId>
-        <version>3.20.300</version>
+        <version>3.20.400</version>
       </dependency>
       <!-- required to mitigate Eclipse dependency signing problems -->
       <dependency>
@@ -269,17 +264,17 @@
         <version>3.34.200</version>
       </dependency>
       <dependency>
-        <groupId>org.eclipse.xtend</groupId>
+        <groupId>org.eclipse.xtext</groupId>
         <artifactId>org.eclipse.xtend.core</artifactId>
         <version>${xtend.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.eclipse.xtend</groupId>
+        <groupId>org.eclipse.xtext</groupId>
         <artifactId>org.eclipse.xtend.lib</artifactId>
         <version>${xtend.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.eclipse.xtend</groupId>
+        <groupId>org.eclipse.xtext</groupId>
         <artifactId>org.eclipse.xtend.lib.macro</artifactId>
         <version>${xtend.version}</version>
       </dependency>
@@ -306,33 +301,33 @@
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-api</artifactId>
-        <version>6.0.3</version>
+        <version>6.1.0</version>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-params</artifactId>
-        <version>6.0.3</version>
+        <version>6.1.0</version>
       </dependency>
       <dependency>
         <groupId>org.junit.jupiter</groupId>
         <artifactId>junit-jupiter-engine</artifactId>
-        <version>6.0.3</version>
+        <version>6.1.0</version>
         <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-commons</artifactId>
-        <version>6.0.3</version>
+        <version>6.1.0</version>
       </dependency>
       <dependency>
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-engine</artifactId>
-        <version>6.0.3</version>
+        <version>6.1.0</version>
       </dependency>
       <dependency>
         <groupId>org.junit.platform</groupId>
         <artifactId>junit-platform-launcher</artifactId>
-        <version>6.0.3</version>
+        <version>6.1.0</version>
       </dependency>
       <dependency>
         <groupId>org.json</groupId>
@@ -446,11 +441,11 @@
     </pluginRepository>
     <!-- allow snapshots in plugin dependencies -->
     <pluginRepository>
-      <id>ossrh-snapshots</id>
-      <name>OSSRH Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <id>central-portal-snapshots</id>
+      <name>Central Portal Snapshots</name>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
       <snapshots>
-        <enabled>true</enabled>
+        <enabled>false</enabled>
       </snapshots>
       <releases>
         <enabled>false</enabled>

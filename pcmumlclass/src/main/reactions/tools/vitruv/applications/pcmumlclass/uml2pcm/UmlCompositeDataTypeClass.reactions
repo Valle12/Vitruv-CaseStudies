@@ -47,8 +47,8 @@ routine detectOrCreateCorrespondingCompositeDataType(uml::Class umlClass, uml::P
 		require absence of pcm::CompositeDataType corresponding to umlClass tagged TagLiterals.COMPOSITE_DATATYPE__CLASS
 	}
 	update {
-		val candidates = pcmRepository.dataTypes__Repository.filter(CompositeDataType).filter [ type |
-			type.entityName == umlClass.name
+		val candidates = pcmRepository.dataTypes__Repository.filter(CompositeDataType).filter [ candidate |
+			candidate.entityName == umlClass.name
 		]
 		switch (candidates.size) {
 			case 0:
