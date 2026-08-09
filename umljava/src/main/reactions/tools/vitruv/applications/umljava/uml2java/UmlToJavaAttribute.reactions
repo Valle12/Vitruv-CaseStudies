@@ -1,4 +1,5 @@
 import org.eclipse.uml2.uml.Enumeration
+import org.eclipse.uml2.uml.LiteralUnlimitedNatural
 import org.eclipse.uml2.uml.Property
 import org.eclipse.uml2.uml.VisibilityKind
 import org.emftext.language.java.members.ClassMethod
@@ -111,8 +112,12 @@ routine createJavaInterfaceField(uml::Property umlProperty) {
 		javaField.makePublic
 		javaField.static = true
 		javaField.final = true
-		umlProperty.isReadOnly = true
-		umlProperty.isStatic = true
+		javaField.initialValue = createDefaultInitialValue(umlProperty.type?.name,
+			umlProperty.upper == LiteralUnlimitedNatural.UNLIMITED || umlProperty.upper > 1)
+		if (umlProperty.owner instanceof org.eclipse.uml2.uml.Interface) {
+			umlProperty.isReadOnly = true
+			umlProperty.isStatic = true
+		}
 		addCorrespondenceBetween(umlProperty, javaField)
 	}
 }

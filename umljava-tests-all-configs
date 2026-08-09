@@ -1,18 +1,11 @@
 #!/usr/bin/env bash
-# Run umljava tests against every preprocessed configN-reactions dir and print
-# a summary table of tests / failures / errors / skipped per config.
-#
-# Usage:
-#   ./umljava-tests-all-configs                 # run configs 1..9
-#   ./umljava-tests-all-configs 1 3 5           # run only the listed configs
-#   SKIP_SETUP=1 ./umljava-tests-all-configs    # reuse already-installed deps
-#
-# Logs land in ./umljava-tests-logs/ (one file per config + summary.log).
 
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-CFG_DIR="${UMLJAVA_CFG_DIR:-/home/valentin/IdeaProjects/Vitruv-DSLs/reactions/preprocessor/src/main/resources/configs}"
+# shellcheck source=vitruv-dsls-configs.sh
+. "$ROOT/vitruv-dsls-configs.sh"
+CFG_DIR="$(dsls_configs_dir)" || exit 1
 LOG_DIR="${UMLJAVA_LOG_DIR:-$ROOT/umljava-tests-logs}"
 
 if [ "$#" -gt 0 ]; then
@@ -57,7 +50,7 @@ for n in "${CONFIGS[@]}"; do
   fi
 
   log "[config$n] starting"
-  ./mvnw -pl umljava clean test -Dumljava.reactions.dir="$REAC" > "$LOG" 2>&1
+  ./mvnw -pl umljava clean test -Dumljava.reactions.dir="$(to_host_path "$REAC")" > "$LOG" 2>&1
   rc=$?
 
   line=$(grep -E "Tests run:[[:space:]]*[0-9]+,[[:space:]]*Failures:[[:space:]]*[0-9]+,[[:space:]]*Errors:[[:space:]]*[0-9]+,[[:space:]]*Skipped:[[:space:]]*[0-9]+" "$LOG" | tail -1)

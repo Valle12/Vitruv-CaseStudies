@@ -269,7 +269,12 @@ routine setUmlFeatureStatic(java::AnnotableAndModifiable jElem, Boolean isStatic
 		val uFeature = retrieve uml::Feature corresponding to jElem
 	}
 	update {
-		uFeature.isStatic = isStatic
+		val mandatoryOnly = jElem instanceof org.emftext.language.java.members.Field
+			&& jElem.eContainer instanceof org.emftext.language.java.classifiers.Interface
+			&& !(uFeature.owner instanceof org.eclipse.uml2.uml.Interface)
+		if (!mandatoryOnly) {
+			uFeature.isStatic = isStatic
+		}
 	}
 }
 
@@ -392,7 +397,11 @@ routine changeUmlNamedElementVisibility(java::AnnotableAndModifiable jElem) {
 		val uElem = retrieve uml::NamedElement corresponding to jElem tagged ""
 	}
 	update {
-		uElem.visibility = getUmlVisibilityKindFromJavaElement(jElem)
+		val forcedByInterface = jElem.eContainer instanceof org.emftext.language.java.classifiers.Interface
+			&& !(uElem.owner instanceof org.eclipse.uml2.uml.Interface)
+		if (!forcedByInterface) {
+			uElem.visibility = getUmlVisibilityKindFromJavaElement(jElem)
+		}
 	}
 }
 

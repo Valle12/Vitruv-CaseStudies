@@ -1,1 +1,16 @@
-./mvnw clean && ./mvnw -pl pcmumlclass,util.temporary,testutility,testutility.integration -am install -DskipTests && ./mvnw -pl umljava install -Dumljava.reactions.dir=/mnt/e/projects/Vitruv-DSLs/reactions/preprocessor/src/main/resources/configs/config1-reactions
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=vitruv-dsls-configs.sh
+. "$ROOT/vitruv-dsls-configs.sh"
+
+CONFIG="${1:-1}"
+REACTIONS="$(config_reactions_dir "$CONFIG")"
+
+cd "$ROOT"
+echo "Building umljava against config${CONFIG} at $REACTIONS"
+./mvnw clean
+./mvnw -pl pcmumlclass,util.temporary,testutility,testutility.integration -am install -DskipTests
+./mvnw -pl umljava install -Dumljava.reactions.dir="$REACTIONS"

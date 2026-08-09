@@ -301,6 +301,7 @@ routine createUmlInterfaceFromClass(java::Class jClass, java::CompilationUnit jC
 	match {
 		require absence of uml::Class corresponding to jClass
 		require absence of uml::Interface corresponding to jClass
+		require absence of uml::DataType corresponding to jClass
 	}
 	create {
 		val uInterface = new uml::Interface
@@ -326,6 +327,7 @@ routine createUmlEnumFromClass(java::Class jClass, java::CompilationUnit jCompUn
 	match {
 		require absence of uml::Class corresponding to jClass
 		require absence of uml::Enumeration corresponding to jClass
+		require absence of uml::DataType corresponding to jClass
 	}
 	create {
 		val uEnum = new uml::Enumeration
@@ -546,6 +548,7 @@ routine createOrFindUmlInterface(java::Interface jInterface, java::CompilationUn
 	match {
 		val uModel = retrieve uml::Model corresponding to UMLPackage.Literals.MODEL
 		require absence of uml::Interface corresponding to jInterface
+		require absence of uml::Class corresponding to jInterface
 	}
 	update {
 		val uInterface = findUmlInterface(uModel, jInterface.name, jCompUnit.namespaces.lastOrNull)

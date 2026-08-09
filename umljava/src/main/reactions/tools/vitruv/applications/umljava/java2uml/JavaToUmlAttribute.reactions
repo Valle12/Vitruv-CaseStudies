@@ -346,7 +346,11 @@ routine setUmlAttributeFinal(java::Field jAttr, Boolean isFinal) {
 		val uAttr = retrieve uml::Property corresponding to jAttr
 	}
 	update {
-		uAttr.isReadOnly = isFinal
+		val mandatoryOnly = jAttr.eContainer instanceof org.emftext.language.java.classifiers.Interface
+			&& !(uAttr.owner instanceof org.eclipse.uml2.uml.Interface)
+		if (!mandatoryOnly) {
+			uAttr.isReadOnly = isFinal
+		}
 	}
 }
 

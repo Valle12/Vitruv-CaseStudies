@@ -65,11 +65,15 @@ routine createOrFindJavaConstructor(uml::Operation umlOperation, uml::Classifier
 		require absence of java::Method corresponding to umlOperation
 	}
 	update {
-		val foundConstructor = javaClassifier.members.filter(Constructor).findFirst[name == umlOperation.name]
-		if (foundConstructor === null) {
-			createJavaConstructor(umlOperation)
+		if (javaClassifier instanceof org.emftext.language.java.classifiers.Interface) {
+			createOrFindJavaInterfaceMethod(umlOperation, umlClassifier)
 		} else {
-			addMethodCorrespondence(foundConstructor, umlOperation)
+			val foundConstructor = javaClassifier.members.filter(Constructor).findFirst[name == umlOperation.name]
+			if (foundConstructor === null) {
+				createJavaConstructor(umlOperation)
+			} else {
+				addMethodCorrespondence(foundConstructor, umlOperation)
+			}
 		}
 	}
 }
@@ -93,11 +97,15 @@ routine createOrFindJavaClassMethod(uml::Operation umlOperation, uml::Classifier
 		require absence of java::Constructor corresponding to umlOperation
 	}
 	update {
-		val foundMethod = javaClassifier.members.filter(ClassMethod).findFirst[name == umlOperation.name]
-		if (foundMethod === null) {
-			createJavaClassMethod(umlOperation)
+		if (javaClassifier instanceof org.emftext.language.java.classifiers.Interface) {
+			createOrFindJavaInterfaceMethod(umlOperation, umlClassifier)
 		} else {
-			addMethodCorrespondence(foundMethod, umlOperation)
+			val foundMethod = javaClassifier.members.filter(ClassMethod).findFirst[name == umlOperation.name]
+			if (foundMethod === null) {
+				createJavaClassMethod(umlOperation)
+			} else {
+				addMethodCorrespondence(foundMethod, umlOperation)
+			}
 		}
 	}
 }
