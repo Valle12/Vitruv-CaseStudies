@@ -6,7 +6,9 @@ import org.eclipse.uml2.uml.Model
 import org.eclipse.uml2.uml.PrimitiveType
 import org.eclipse.uml2.uml.UMLPackage
 import org.emftext.language.java.containers.ContainersPackage
+import org.emftext.language.java.imports.ClassifierImport
 import org.emftext.language.java.members.Constructor
+import org.emftext.language.java.types.TypeReference
 import tools.vitruv.change.interaction.UserInteractionOptions.NotificationType
 import tools.vitruv.change.interaction.UserInteractionOptions.WindowModality
 import static extension tools.vitruv.applications.util.temporary.java.UmlJavaTypePropagationHelper.*
@@ -351,6 +353,9 @@ routine addJavaRealizationSuffix(uml::Class umlClass) {
 		val newName = javaClass.name + "Impl"
 		javaClass.name = newName
 		umlClass.name = newName
+		if (umlClass.eResource !== null && umlClass.eContainer instanceof org.eclipse.uml2.uml.Package) {
+			insertJavaClassifier(umlClass, umlClass.eContainer as org.eclipse.uml2.uml.Package)
+		}
 	}
 }
 
@@ -370,6 +375,9 @@ routine stripJavaRealizationSuffix(uml::Class umlClass) {
 		val newName = javaClass.name.substring(0, javaClass.name.length - "Impl".length)
 		javaClass.name = newName
 		umlClass.name = newName
+		if (umlClass.eResource !== null && umlClass.eContainer instanceof org.eclipse.uml2.uml.Package) {
+			insertJavaClassifier(umlClass, umlClass.eContainer as org.eclipse.uml2.uml.Package)
+		}
 	}
 }
 
@@ -416,9 +424,19 @@ routine deleteJavaClassImplementsReference(uml::InterfaceRealization uRealizatio
 		val jReference = retrieve java::TypeReference corresponding to uRealization
 	}
 	update {
+		val jCompUnit = jClass.containingCompilationUnit
+		val jImplemented = jReference.target
 		uRealization.clients -= uClass
 		removeObject(jReference)
 		removeCorrespondenceBetween(jReference, uRealization)
+		if (jCompUnit !== null && jImplemented !== null) {
+			val stillUsed = jCompUnit.eAllContents.filter(TypeReference).exists[target === jImplemented]
+			if (!stillUsed) {
+				jCompUnit.imports.removeIf[
+					it instanceof ClassifierImport && (it as ClassifierImport).classifier === jImplemented
+				]
+			}
+		}
 	}
 }
 

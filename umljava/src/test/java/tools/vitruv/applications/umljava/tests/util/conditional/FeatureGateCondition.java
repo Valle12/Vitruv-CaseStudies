@@ -26,6 +26,9 @@ public class FeatureGateCondition
 
   private static final Namespace NAMESPACE = Namespace.create(FeatureGateCondition.class);
   private static final String OBSERVED_FAILURE_KEY = "observedExpectedFailure";
+  private static final String GATE_PROPERTY = "umljava.features.gate";
+  private static final boolean GATE_ENABLED =
+      Boolean.parseBoolean(System.getProperty(GATE_PROPERTY, "true").strip());
 
   @Override
   public void handleTestExecutionException(ExtensionContext context, Throwable throwable)
@@ -73,6 +76,10 @@ public class FeatureGateCondition
   }
 
   private GateOutcome evaluateGate(ExtensionContext context) {
+    if (!GATE_ENABLED) {
+      return GateOutcome.satisfied();
+    }
+
     List<RequiresFeatures> methodRequires = new ArrayList<>();
     List<RequiresFeatures> classRequires = new ArrayList<>();
     List<IncompatibleFeatures> incompatible = new ArrayList<>();
@@ -152,27 +159,8 @@ public class FeatureGateCondition
       AnnotatedElement element,
       List<RequiresFeatures> requires,
       List<IncompatibleFeatures> incompatible) {
-    RequiresFeatures direct = element.getAnnotation(RequiresFeatures.class);
-    if (direct != null) {
-      requires.add(direct);
-    }
-
-    RequiresFeatures.Container reqContainer =
-        element.getAnnotation(RequiresFeatures.Container.class);
-    if (reqContainer != null) {
-      requires.addAll(Arrays.asList(reqContainer.value()));
-    }
-
-    IncompatibleFeatures directInc = element.getAnnotation(IncompatibleFeatures.class);
-    if (directInc != null) {
-      incompatible.add(directInc);
-    }
-
-    IncompatibleFeatures.Container incContainer =
-        element.getAnnotation(IncompatibleFeatures.Container.class);
-    if (incContainer != null) {
-      incompatible.addAll(Arrays.asList(incContainer.value()));
-    }
+    requires.addAll(Arrays.asList(element.getAnnotationsByType(RequiresFeatures.class)));
+    incompatible.addAll(Arrays.asList(element.getAnnotationsByType(IncompatibleFeatures.class)));
   }
 
   private static final class GateOutcome {

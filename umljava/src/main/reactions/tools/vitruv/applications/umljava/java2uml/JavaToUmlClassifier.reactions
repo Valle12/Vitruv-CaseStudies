@@ -643,6 +643,8 @@ routine createOrFindUmlEnum(java::Enumeration jEnum, java::CompilationUnit jComp
 	match {
 		val uModel = retrieve uml::Model corresponding to UMLPackage.Literals.MODEL
 		require absence of uml::Enumeration corresponding to jEnum
+		require absence of uml::Class corresponding to jEnum
+		require absence of uml::DataType corresponding to jEnum
 	}
 	update {
 		val uEnum = findUmlEnum(uModel, jEnum.name, jCompUnit.namespaces.lastOrNull)

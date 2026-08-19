@@ -424,12 +424,62 @@ routine renameUmlNamedElement(java::NamedElement jElement) {
 //===========================================
 //=========================================== Unsupported
 //===========================================
-//An interface can theoretically have static, non-abstract methods
 @feature(type = "InterfaceConstraints")
 reaction JavaClassMethodCreatedInInterface {
 	after element java::ClassMethod inserted in java::Interface[members]
-	call showMessage(userInteractor,
-		"ClassMethods are currently not supported in Interfaces. Please delete " + newValue)
+	with !newValue.hasModifier(org.emftext.language.java.modifiers.Static)
+	call convertClassMethodToInterfaceMethod(newValue, affectedEObject)
+}
+
+routine convertClassMethodToInterfaceMethod(java::ClassMethod jMethod, java::Interface jInterface) {
+	create {
+		val jInterfaceMethod = new java::InterfaceMethod
+	}
+	update {
+		jInterfaceMethod.name = jMethod.name
+		jInterfaceMethod.makePublic
+		jInterfaceMethod.typeReference = jMethod.typeReference
+		jInterfaceMethod.parameters += jMethod.parameters
+		val index = jInterface.members.indexOf(jMethod)
+		jInterface.members.remove(jMethod)
+		jInterface.members.add(index, jInterfaceMethod)
+		showMessage(userInteractor,
+			"An interface cannot hold a method body, and this metamodel has no `default` modifier " +
+				"to make one legal. Kept the declaration of " + jInterfaceMethod.name +
+				" and dropped its body.")
+	}
+}
+
+@feature(type = "InterfaceConstraints")
+reaction JavaInterfaceMadeFinal {
+	after element java::Final inserted in java::Interface[annotationsAndModifiers]
+	call dropModifierIllegalInInterface(affectedEObject, newValue)
+}
+
+@feature(type = "InterfaceConstraints")
+reaction JavaInterfaceMethodMadeFinal {
+	after element java::Final inserted in java::InterfaceMethod[annotationsAndModifiers]
+	call dropModifierIllegalInInterface(affectedEObject, newValue)
+}
+
+@feature(type = "InterfaceConstraints")
+reaction JavaInterfaceFieldMadePrivate {
+	after element java::Private inserted in java::Field[annotationsAndModifiers]
+	with affectedEObject.eContainer instanceof org.emftext.language.java.classifiers.Interface
+	call dropModifierIllegalInInterface(affectedEObject, newValue)
+}
+
+@feature(type = "InterfaceConstraints")
+reaction JavaInterfaceFieldMadeProtected {
+	after element java::Protected inserted in java::Field[annotationsAndModifiers]
+	with affectedEObject.eContainer instanceof org.emftext.language.java.classifiers.Interface
+	call dropModifierIllegalInInterface(affectedEObject, newValue)
+}
+
+routine dropModifierIllegalInInterface(java::AnnotableAndModifiable jHolder, java::Modifier jModifier) {
+	update {
+		jHolder.annotationsAndModifiers.remove(jModifier)
+	}
 }
 
 @feature(type = "ParameterConstraints")

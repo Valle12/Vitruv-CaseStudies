@@ -22,6 +22,8 @@ log()  { printf '%s %s\n' "$(date -Is)" "$*" | tee -a "$SUMMARY"; }
 
 cd "$ROOT" || exit
 
+log "[env] EXTRA_MVN_OPTS=${EXTRA_MVN_OPTS:-<none>}"
+
 if [ "${SKIP_SETUP:-0}" != "1" ]; then
   log "[setup] clean"
   if ! ./mvnw -q clean > "$LOG_DIR/00-clean.log" 2>&1; then
@@ -50,7 +52,7 @@ for n in "${CONFIGS[@]}"; do
   fi
 
   log "[config$n] starting"
-  ./mvnw -pl umljava clean test -Dumljava.reactions.dir="$(to_host_path "$REAC")" > "$LOG" 2>&1
+  ./mvnw -pl umljava clean test ${EXTRA_MVN_OPTS:-} -Dumljava.reactions.dir="$(to_host_path "$REAC")" > "$LOG" 2>&1
   rc=$?
 
   line=$(grep -E "Tests run:[[:space:]]*[0-9]+,[[:space:]]*Failures:[[:space:]]*[0-9]+,[[:space:]]*Errors:[[:space:]]*[0-9]+,[[:space:]]*Skipped:[[:space:]]*[0-9]+" "$LOG" | tail -1)
