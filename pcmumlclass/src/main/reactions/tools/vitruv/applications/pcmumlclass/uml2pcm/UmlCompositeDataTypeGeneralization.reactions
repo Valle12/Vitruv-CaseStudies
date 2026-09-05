@@ -15,6 +15,7 @@ reactions: umlCompositeDataTypeGeneralizationReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeGeneralizationAdded {
 	after element uml::Generalization inserted in uml::Class[generalization]
 	with affectedEObject.generalizations.contains(newValue) // validity check
@@ -35,6 +36,7 @@ routine addCompositeDatatypeParent(uml::Class umlClass, uml::Classifier umlNewPa
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeGeneralizationRemoved {
 	after element uml::Generalization removed from uml::Class[generalization]
 	with !affectedEObject.generalizations.contains(oldValue) // validity check
@@ -55,6 +57,7 @@ routine removeCompositeDatatypeParent(uml::Class umlClass, uml::Classifier umlOl
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeGeneralizationTypeChanged {
 	after element replaced at uml::Generalization[general]
 	with affectedEObject.specific instanceof Class

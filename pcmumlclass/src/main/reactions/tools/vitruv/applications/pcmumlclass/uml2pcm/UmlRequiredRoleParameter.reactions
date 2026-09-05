@@ -17,6 +17,7 @@ reactions: umlRequiredRoleParameterReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction RequiredRoleParameterInserted {
 	after element uml::Parameter inserted in uml::Operation[ownedParameter]
 	with affectedEObject.ownedParameters.contains(newValue)
@@ -111,6 +112,7 @@ routine parameter_moveCorrespondingRequiredRole(uml::Parameter umlParameter, uml
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RequiredRolePropertyRemoved {
 	after element uml::Parameter removed from uml::Operation[ownedParameter]
 	with !affectedEObject.ownedParameters.contains(oldValue) // validity check
@@ -129,6 +131,7 @@ routine parameter_removeCorrespondingRequiredRole(uml::Parameter umlParameter, u
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RequiredRolePropertyDeleted {
 	after element uml::Parameter deleted
 	call parameter_deleteCorrespondingRequiredRole(affectedEObject)
@@ -145,6 +148,7 @@ routine parameter_deleteCorrespondingRequiredRole(uml::Parameter umlParameter) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RequiredRoleParameterNameChanged {
 	after attribute replaced at uml::Parameter[name]
 	with affectedEObject.name === newValue
@@ -161,6 +165,7 @@ routine parameter_changeNameOfCorrespondingRequiredRole(uml::Parameter umlParame
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RequiredRoleParameterTypeChanged {
 	after element uml::Interface replaced at uml::Parameter[type]
 	with affectedEObject.type === newValue

@@ -29,6 +29,7 @@ reactions: umlRepositoryAndSystemPackageReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction UmlModelCreated {
 	after element uml::Model inserted as root
 	call ensureModelCorrespondenceExists(newValue)
@@ -44,6 +45,7 @@ routine ensureModelCorrespondenceExists(uml::Model newModel) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryOrSystemPackageInserted {
 	after element uml::Package inserted in uml::Package[packagedElement]
 	with {
@@ -216,6 +218,7 @@ routine createCorrespondingSystem(uml::Package umlPkg, uml::Package umlParentPkg
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction UmlModelDeleted {
 	after element uml::Model deleted
 	call removedUmlModel(affectedEObject)
@@ -229,6 +232,7 @@ routine removedUmlModel(uml::Model removedModel) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryOrSystemPackageDeleted {
 	after element uml::Package deleted
 	call deletePackage(affectedEObject)
@@ -262,6 +266,7 @@ routine deleteCorrespondingSystem(uml::Package umlSystemPkg) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryOrSystemPackageRenamed {
 	after attribute replaced at uml::Package[name]
 	with affectedEObject.name == newValue

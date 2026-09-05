@@ -101,6 +101,7 @@ routine addCollectionDataTypeCorrespondence(pcm::CollectionDataType pcmType, uml
 }
 
 // UNSUPPORTED WARNING - unsupported/unmapped PrimitiveType has been set warning
+@feature(type = "PcmUmlClass")
 reaction UnsupportedPrimitiveTypeSetAtInnerDeclaration {
 	after element pcm::PrimitiveDataType replaced at pcm::InnerDeclaration[datatype_InnerDeclaration]
 	with affectedEObject.datatype_InnerDeclaration === newValue &&
@@ -108,12 +109,14 @@ reaction UnsupportedPrimitiveTypeSetAtInnerDeclaration {
 	call unsupportedPrimitiveTypeSetWarning(newValue, affectedEObject)
 }
 
+@feature(type = "PcmUmlClass")
 reaction UnsupportedPrimitiveTypeSetAtParameter {
 	after element pcm::PrimitiveDataType replaced at pcm::Parameter[dataType__Parameter]
 	with affectedEObject.dataType__Parameter === newValue && !PcmDataTypeUtil.isSupportedPcmPrimitiveType(newValue)
 	call unsupportedPrimitiveTypeSetWarning(newValue, affectedEObject)
 }
 
+@feature(type = "PcmUmlClass")
 reaction UnsupportedPrimitiveTypeSetAtSignature {
 	after element pcm::PrimitiveDataType replaced at pcm::OperationSignature[returnType__OperationSignature]
 	with affectedEObject.returnType__OperationSignature === newValue &&

@@ -20,6 +20,7 @@ reactions: umlRepositoryComponentPackageReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryComponentPackageInserted {
 	after element uml::Package inserted in uml::Package[packagedElement]
 	call {
@@ -158,6 +159,7 @@ routine moveCorrespondingRepositoryComponent(uml::Package umlPkg, uml::Package u
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryComponentPackageRemoved {
 	after element uml::Package removed from uml::Package[nestedPackage]
 	with !affectedEObject.nestedPackages.contains(oldValue)
@@ -176,6 +178,7 @@ routine removeCorrespondingRepositoryComponent(uml::Package umlPkg, uml::Package
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction PackageDeleted {
 	after element uml::Package deleted
 	call deleteCorrespondingRepositoryComponent(affectedEObject)
@@ -192,6 +195,7 @@ routine deleteCorrespondingRepositoryComponent(uml::Package umlComponentPkg) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryComponentPackageRenamed {
 	after attribute replaced at uml::Package[name]
 	with affectedEObject.name == newValue

@@ -16,6 +16,10 @@
   <name>Vitruv PCM-UML Class Application</name>
   <description>The PCM UML case study</description>
 
+  <properties>
+    <pcmumlclass.reactions.dir>${project.basedir}/src/main/reactions</pcmumlclass.reactions.dir>
+  </properties>
+
   <build>
     <plugins>
       <plugin>
@@ -30,7 +34,7 @@
             </goals>
             <configuration>
               <sources>
-                <source>${project.basedir}/src/main/reactions</source>
+                <source>${pcmumlclass.reactions.dir}</source>
                 <source>${project.build.directory}/generated-sources/reactions</source>
               </sources>
             </configuration>

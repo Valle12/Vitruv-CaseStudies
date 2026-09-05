@@ -18,6 +18,7 @@ execute actions in uml
 
 import routines pcmDataTypePropagationReactions using qualified names
 
+@feature(type = "PcmUmlClass")
 reaction SignatureInsertedInInterface {
 	after element pcm::OperationSignature inserted in pcm::OperationInterface[signatures__OperationInterface]
 	with affectedEObject.signatures__OperationInterface.contains(newValue)
@@ -152,6 +153,7 @@ routine moveCorrespondingOperation(pcm::OperationSignature pcmSignature, pcm::Op
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction SignatureRemovedFromInterface {
 	after element pcm::OperationSignature removed from pcm::OperationInterface[signatures__OperationInterface]
 	with !affectedEObject.signatures__OperationInterface.contains(oldValue)
@@ -169,6 +171,7 @@ routine removeCorrespondingOperation(pcm::OperationSignature pcmSignature, pcm::
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction SignatureDeleted {
 	after element pcm::OperationSignature deleted
 	call deleteCorrespondingOperation(affectedEObject)
@@ -187,6 +190,7 @@ routine deleteCorrespondingOperation(pcm::OperationSignature pcmSignature) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction SignatureRenamed {
 	after attribute replaced at pcm::OperationSignature[entityName]
 	with affectedEObject.entityName == newValue
@@ -202,6 +206,7 @@ routine renameCorrespondingOperation(pcm::OperationSignature pcmSignature, Strin
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction SignatureReturnTypeChanged {
 	after element pcm::DataType replaced at pcm::OperationSignature[returnType__OperationSignature]
 	with affectedEObject.returnType__OperationSignature === newValue

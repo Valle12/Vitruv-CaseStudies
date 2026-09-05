@@ -17,6 +17,7 @@ reactions: umlInnerDeclarationPropertyReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyInserted {
 	after element uml::Property inserted in uml::Class[ownedAttribute]
 	with affectedEObject.ownedAttributes.contains(newValue)
@@ -102,6 +103,7 @@ routine moveCorrespondingInnerDeclaration(uml::Property umlProperty, uml::Class 
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyRemoved {
 	after element uml::Property removed from uml::Class[ownedAttribute]
 	with !affectedEObject.ownedAttributes.contains(oldValue) // validity check
@@ -120,6 +122,7 @@ routine removeCorrespondingInnerDeclaration(uml::Property umlProperty, uml::Clas
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyDeleted {
 	after element uml::Property deleted
 	call deleteCorrespondingInnerDeclaration(affectedEObject)
@@ -136,6 +139,7 @@ routine deleteCorrespondingInnerDeclaration(uml::Property umlProperty) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyNameChanged {
 	after attribute replaced at uml::Property[name]
 	with affectedEObject.name == newValue
@@ -152,28 +156,33 @@ routine changeNameOfCorrespondingInnerDeclaration(uml::Property umlProperty, Str
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyTypeChanged {
 	after element replaced at uml::Property[type]
 	with affectedEObject.type === newValue && oldValue !== newValue
 	call propagateTypeChange(affectedEObject)
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyLowerChanged {
 	after element replaced at uml::Property[lowerValue]
 	call propagateTypeChange(affectedEObject)
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyLowerChanged2 {
 	after attribute replaced at uml::LiteralInteger[value]
 	with affectedEObject.owner instanceof Property && affectedEObject.value == newValue
 	call propagateTypeChange(affectedEObject.owner as Property)
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyUpperChanged {
 	after element replaced at uml::Property[upperValue]
 	call propagateTypeChange(affectedEObject)
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationPropertyUpperChanged2 {
 	after attribute replaced at uml::LiteralUnlimitedNatural[value]
 	with affectedEObject.owner instanceof Property && affectedEObject.value == newValue

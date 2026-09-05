@@ -17,6 +17,7 @@ reactions: pcmAssemblyContextReactions
 in reaction to changes in pcm
 execute actions in uml
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextInserted {
 	after element pcm::AssemblyContext inserted in pcm::ComposedProvidingRequiringEntity[assemblyContexts__ComposedStructure]
 	with affectedEObject.assemblyContexts__ComposedStructure.contains(newValue)
@@ -92,6 +93,7 @@ routine moveCorrespondingAssemblyContextProperty(pcm::AssemblyContext pcmAssembl
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextRemoved {
 	after element pcm::AssemblyContext removed from pcm::ComposedProvidingRequiringEntity[assemblyContexts__ComposedStructure]
 	with !affectedEObject.assemblyContexts__ComposedStructure.contains(oldValue)
@@ -110,6 +112,7 @@ routine removeCorrespondingAssemblyContextProperty(pcm::AssemblyContext pcmAssem
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextDeleted {
 	after element pcm::AssemblyContext deleted
 	call deleteCorrespondingAssemblyContextProperty(affectedEObject)
@@ -126,6 +129,7 @@ routine deleteCorrespondingAssemblyContextProperty(pcm::AssemblyContext pcmAssem
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextNameChanged {
 	after attribute replaced at pcm::AssemblyContext[entityName]
 	with affectedEObject.entityName == newValue
@@ -142,6 +146,7 @@ routine changeNameOfCorrespondingAssemblyContextProperty(pcm::AssemblyContext pc
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextComponentChanged {
 	after element pcm::RepositoryComponent replaced at pcm::AssemblyContext[encapsulatedComponent__AssemblyContext]
 	with {

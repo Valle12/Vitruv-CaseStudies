@@ -19,6 +19,7 @@ execute actions in pcm
 //		PcmCompositeDataType.reactions
 //		UmlCompositeDataTypeGeneralization.reactions
 //		CompositeDataTypeConceptTest
+@feature(type = "PcmUmlClass")
 reaction CompositeDatyTypeClassInserted {
 	after element uml::Class inserted in uml::Package[packagedElement]
 	with newValue.package === affectedEObject
@@ -99,6 +100,7 @@ routine moveCorrespondingCompositeDataType(uml::Class umlClass, uml::Package uml
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeClassRemoved {
 	after element uml::Class removed from uml::Package[packagedElement]
 	with oldValue.package !== affectedEObject
@@ -117,6 +119,7 @@ routine removeCorrespondingCompositeType(uml::Class umlClass, uml::Package umlPa
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeClassDeleted {
 	after element uml::Class deleted
 	call deleteCorrespondingCompositeDataType(affectedEObject)
@@ -133,6 +136,7 @@ routine deleteCorrespondingCompositeDataType(uml::Class umlClass) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeClassNameChanged {
 	after attribute replaced at uml::Class[name]
 	with affectedEObject.name == newValue

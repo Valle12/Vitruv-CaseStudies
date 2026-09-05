@@ -15,6 +15,7 @@ execute actions in uml
 
 import routines pcmDataTypePropagationReactions using qualified names
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationInserted {
 	after element pcm::InnerDeclaration inserted in pcm::CompositeDataType[innerDeclaration_CompositeDataType]
 	with affectedEObject.innerDeclaration_CompositeDataType.contains(newValue)
@@ -86,6 +87,7 @@ routine moveCorrespondingAttribute(pcm::InnerDeclaration pcmAttribute, pcm::Comp
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationRemoved {
 	after element pcm::InnerDeclaration removed from pcm::CompositeDataType[innerDeclaration_CompositeDataType]
 	with !affectedEObject.innerDeclaration_CompositeDataType.contains(oldValue)
@@ -104,6 +106,7 @@ routine removeCorrespondingAttribute(pcm::InnerDeclaration pcmAttribute, pcm::Co
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationDeleted {
 	after element pcm::InnerDeclaration deleted
 	call deleteCorrespondingAttribute(affectedEObject)
@@ -120,6 +123,7 @@ routine deleteCorrespondingAttribute(pcm::InnerDeclaration pcmAttribute) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationNameChanged {
 	after attribute replaced at pcm::InnerDeclaration[entityName]
 	with affectedEObject.entityName == newValue
@@ -136,6 +140,7 @@ routine changeNameOfCorrespondingAttribute(pcm::InnerDeclaration pcmAttribute, S
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InnerDeclarationTypeChanged {
 	after element pcm::DataType replaced at pcm::InnerDeclaration[datatype_InnerDeclaration]
 	with affectedEObject.datatype_InnerDeclaration === newValue && newValue != oldValue

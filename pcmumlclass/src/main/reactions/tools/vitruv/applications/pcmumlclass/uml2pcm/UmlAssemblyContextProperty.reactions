@@ -19,6 +19,7 @@ reactions: umlAssemblyContextPropertyReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextPropertyInserted {
 	after element uml::Property inserted in uml::Class[ownedAttribute]
 	with affectedEObject.ownedAttributes.contains(newValue)
@@ -109,6 +110,7 @@ routine moveCorrespondingAssemblyContext(uml::Property umlProperty, uml::Class u
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextPropertyRemoved {
 	after element uml::Property removed from uml::Class[ownedAttribute]
 	with !affectedEObject.ownedAttributes.contains(oldValue) // validity check
@@ -127,6 +129,7 @@ routine removeCorrespondingAssemblyContext(uml::Property umlProperty, uml::Class
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextPropertyDeleted {
 	after element uml::Property deleted
 	call deleteCorrespondingAssemblyContext(affectedEObject)
@@ -143,6 +146,7 @@ routine deleteCorrespondingAssemblyContext(uml::Property umlProperty) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextPropertyNameChanged {
 	after attribute replaced at uml::Property[name]
 	with affectedEObject.name == newValue
@@ -159,6 +163,7 @@ routine changeNameOfCorrespondingAssemblyContext(uml::Property umlProperty, Stri
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction AssemblyContextPropertyTypeChanged {
 	after element uml::Class replaced at uml::Property[type]
 	with affectedEObject.type === newValue

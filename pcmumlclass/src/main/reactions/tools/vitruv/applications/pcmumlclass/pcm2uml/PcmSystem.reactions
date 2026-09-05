@@ -23,6 +23,7 @@ execute actions in uml
 
 import routines sharedRoutines // for UML model handling
 
+@feature(type = "PcmUmlClass")
 reaction SystemCreated {
 	after element pcm::System inserted as root
 	call {
@@ -164,6 +165,7 @@ routine createCorrespondingSystemConstructor(pcm::System pcmSystem) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction SystemDeleted {
 	after element pcm::System deleted
 	call {
@@ -204,6 +206,7 @@ routine deleteCorrespondenceToSystemConstructor(pcm::System pcmSystem) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction SystemNameChanged {
 	after attribute replaced at pcm::System[entityName]
 	with affectedEObject.entityName == newValue

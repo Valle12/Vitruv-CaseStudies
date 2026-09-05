@@ -22,28 +22,33 @@ reactions: umlReturnAndRegularParameterTypeReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction RegularOrReturnParameterTypeChanged {
 	after element replaced at uml::Parameter[type]
 	with affectedEObject.type === newValue && oldValue !== newValue
 	call propagateTypeChange(affectedEObject)
 }
 
+@feature(type = "PcmUmlClass")
 reaction RegularOrReturnParameterLowerChanged {
 	after element replaced at uml::Parameter[lowerValue]
 	call propagateTypeChange(affectedEObject)
 }
 
+@feature(type = "PcmUmlClass")
 reaction RegularOrReturnParameterLowerChanged2 {
 	after attribute replaced at uml::LiteralInteger[value]
 	with affectedEObject.owner instanceof Parameter && affectedEObject.value == newValue
 	call propagateTypeChange(affectedEObject.owner as Parameter)
 }
 
+@feature(type = "PcmUmlClass")
 reaction RegularOrReturnParameterUpperChanged {
 	after element replaced at uml::Parameter[upperValue]
 	call propagateTypeChange(affectedEObject)
 }
 
+@feature(type = "PcmUmlClass")
 reaction RegularOrReturnParameterUpperChanged2 {
 	after attribute replaced at uml::LiteralUnlimitedNatural[value]
 	with affectedEObject.owner instanceof Parameter && affectedEObject.value == newValue

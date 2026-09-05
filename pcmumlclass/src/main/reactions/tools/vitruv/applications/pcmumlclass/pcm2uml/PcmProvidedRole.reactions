@@ -13,6 +13,7 @@ reactions: pcmProvidedRoleReactions
 in reaction to changes in pcm
 execute actions in uml
 
+@feature(type = "PcmUmlClass")
 reaction ProvidedRoleInserted {
 	after element pcm::OperationProvidedRole inserted in pcm::InterfaceProvidingRequiringEntity[providedRoles_InterfaceProvidingEntity]
 	with affectedEObject.providedRoles_InterfaceProvidingEntity.contains(newValue)
@@ -88,6 +89,7 @@ routine moveCorrespondingProvidedRealization(pcm::OperationProvidedRole pcmProvi
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ProvidedRoleRemoved {
 	after element pcm::OperationProvidedRole removed from pcm::InterfaceProvidingRequiringEntity[providedRoles_InterfaceProvidingEntity]
 	with !affectedEObject.providedRoles_InterfaceProvidingEntity.contains(oldValue)
@@ -106,6 +108,7 @@ routine removeCorrespondingProvidedRealization(pcm::OperationProvidedRole pcmPro
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ProvidedRoleDeleted {
 	after element pcm::OperationProvidedRole deleted
 	call deleteCorrespondingProvidedRealization(affectedEObject)
@@ -122,6 +125,7 @@ routine deleteCorrespondingProvidedRealization(pcm::OperationProvidedRole pcmPro
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ProvidedRoleNameChanged {
 	after attribute replaced at pcm::OperationProvidedRole[entityName]
 	with affectedEObject.entityName == newValue
@@ -138,6 +142,7 @@ routine changeNameOfCorrespondingProvidedRealization(pcm::OperationProvidedRole 
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ProvidedRoleInterfaceChanged {
 	after element pcm::OperationInterface replaced at pcm::OperationProvidedRole[providedInterface__OperationProvidedRole]
 	with affectedEObject.providedInterface__OperationProvidedRole == newValue

@@ -15,6 +15,7 @@ reactions: pcmInterfaceReactions
 in reaction to changes in pcm
 execute actions in uml
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceInsertedInRepository {
 	after element pcm::OperationInterface inserted in pcm::Repository[interfaces__Repository]
 	with affectedEObject.interfaces__Repository.contains(newValue)
@@ -87,6 +88,7 @@ routine moveCorrespondingInterface(pcm::OperationInterface pcmInterface, pcm::Re
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceRemovedFromRepository {
 	after element pcm::OperationInterface removed from pcm::Repository[interfaces__Repository]
 	with !affectedEObject.interfaces__Repository.contains(oldValue)
@@ -105,6 +107,7 @@ routine removeCorrespondingInterface(pcm::OperationInterface pcmInterface, pcm::
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceDeleted {
 	after element pcm::OperationInterface deleted
 	call deleteCorrespondingInterface(affectedEObject)
@@ -121,6 +124,7 @@ routine deleteCorrespondingInterface(pcm::OperationInterface pcmInterface) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceRenamed {
 	after attribute replaced at pcm::OperationInterface[entityName]
 	with affectedEObject.entityName == newValue
@@ -137,6 +141,7 @@ routine renameCorrespondingInterface(pcm::OperationInterface pcmInterface, Strin
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ParentInterfaceAdded {
 	after element pcm::OperationInterface inserted in pcm::OperationInterface[parentInterfaces__Interface]
 	with affectedEObject.parentInterfaces__Interface.contains(newValue)
@@ -159,6 +164,7 @@ routine addParentInterfaceToCorrespondingInterface(pcm::OperationInterface pcmIn
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ParentInterfaceRemoved {
 	after element pcm::OperationInterface removed from pcm::OperationInterface[parentInterfaces__Interface]
 	with !affectedEObject.parentInterfaces__Interface.contains(oldValue)

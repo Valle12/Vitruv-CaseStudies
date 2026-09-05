@@ -17,6 +17,7 @@ execute actions in uml
 
 import routines pcmDataTypePropagationReactions using qualified names
 
+@feature(type = "PcmUmlClass")
 reaction ParameterInsertedInSignature {
 	after element pcm::Parameter inserted in pcm::OperationSignature[parameters__OperationSignature]
 	with affectedEObject.parameters__OperationSignature.contains(newValue)
@@ -87,6 +88,7 @@ routine moveCorrespondingRegularParameter(pcm::Parameter pcmParam, pcm::Operatio
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ParameterRemovedFromSignature {
 	after element pcm::Parameter removed from pcm::OperationSignature[parameters__OperationSignature]
 	with !affectedEObject.parameters__OperationSignature.contains(oldValue)
@@ -104,6 +106,7 @@ routine removeCorrespondingRegularParameter(pcm::Parameter pcmParam, pcm::Operat
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ParameterDeletedFromSignature {
 	after element pcm::Parameter deleted
 	call deleteCorrespondingRegularParameter(affectedEObject)
@@ -120,6 +123,7 @@ routine deleteCorrespondingRegularParameter(pcm::Parameter pcmParam) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ParameterRenamed {
 	after attribute replaced at pcm::Parameter[parameterName]
 	with affectedEObject.parameterName == newValue
@@ -135,6 +139,7 @@ routine renameCorrespondingRegularParameter(pcm::Parameter pcmParam, String newN
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ParameterModifierChanged {
 	after attribute replaced at pcm::Parameter[modifier__Parameter]
 	with affectedEObject.modifier__Parameter === newValue
@@ -151,6 +156,7 @@ routine changeDirectionOfCorrespondingRegularParameter(pcm::Parameter pcmParam) 
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ParameterTypeChanged {
 	after element pcm::DataType replaced at pcm::Parameter[dataType__Parameter]
 	with affectedEObject.dataType__Parameter === newValue

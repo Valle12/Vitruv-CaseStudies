@@ -26,6 +26,7 @@ execute actions in uml
 
 import routines sharedRoutines // for UML model handling
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryCreated {
 	after element pcm::Repository inserted as root
 	call {
@@ -115,6 +116,7 @@ routine createUmlDatatypesPackage(pcm::Repository pcmRepo) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryNameChanged {
 	after attribute replaced at pcm::Repository[entityName]
 	with affectedEObject.entityName == newValue
@@ -132,6 +134,7 @@ routine changeNameOfCorrespondingRepositoryPackage(pcm::Repository pcmRepo) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryDeleted {
 	after element pcm::Repository deleted
 	call deleteCorrespondingRepositoryPackages(affectedEObject)

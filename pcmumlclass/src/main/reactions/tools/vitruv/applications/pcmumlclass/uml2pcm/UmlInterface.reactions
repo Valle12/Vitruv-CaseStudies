@@ -17,6 +17,7 @@ reactions: umlInterfaceReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceInserted {
 	after element uml::Interface inserted in uml::Package[packagedElement]
 	call insertCorrespondingInterface(newValue, affectedEObject)
@@ -93,6 +94,7 @@ routine moveCorrespondingInterface(uml::Interface umlInterface, uml::Package uml
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceRemoved {
 	after element uml::Interface removed from uml::Package[packagedElement]
 	call removeCorrespondingInterface(oldValue, affectedEObject)
@@ -110,6 +112,7 @@ routine removeCorrespondingInterface(uml::Interface umlInterface, uml::Package u
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceDeleted {
 	after element uml::Interface deleted
 	call deleteCorrespondingInterface(affectedEObject)
@@ -126,6 +129,7 @@ routine deleteCorrespondingInterface(uml::Interface umlInterface) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceRenamed {
 	after attribute replaced at uml::Interface[name]
 	with affectedEObject.name == newValue // validity check

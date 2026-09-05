@@ -17,6 +17,7 @@ reactions: umlIPREConstructorOperationReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction IPREConstructorOperationNameChanged {
 	after attribute replaced at uml::Operation[name]
 	with affectedEObject.name == newValue

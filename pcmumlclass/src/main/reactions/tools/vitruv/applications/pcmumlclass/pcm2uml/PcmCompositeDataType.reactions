@@ -17,6 +17,7 @@ reactions: pcmCompositeDataTypeReactions
 in reaction to changes in pcm
 execute actions in uml
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeInsertedInRepository {
 	after element pcm::CompositeDataType inserted in pcm::Repository[dataTypes__Repository]
 	with affectedEObject.dataTypes__Repository.contains(newValue)
@@ -89,6 +90,7 @@ routine moveCorrespondingCompositeTypeClass(pcm::CompositeDataType pcmType, pcm:
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeRemovedFromRepository {
 	after element pcm::CompositeDataType removed from pcm::Repository[dataTypes__Repository]
 	with !affectedEObject.dataTypes__Repository.contains(oldValue)
@@ -107,6 +109,7 @@ routine removeCorrespondingCompositeTypeClass(pcm::CompositeDataType pcmType, pc
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeDeleted {
 	after element pcm::CompositeDataType deleted
 	call deleteCorrespondingCompositeTypeClass(affectedEObject)
@@ -123,6 +126,7 @@ routine deleteCorrespondingCompositeTypeClass(pcm::CompositeDataType pcmType) {
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeNameChanged {
 	after attribute replaced at pcm::CompositeDataType[entityName]
 	with affectedEObject.entityName == newValue
@@ -139,6 +143,7 @@ routine changeNameOfCorrespondingCompositeTypeClass(pcm::CompositeDataType pcmTy
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeParentAdded {
 	after element pcm::CompositeDataType inserted in pcm::CompositeDataType[parentType_CompositeDataType]
 	with affectedEObject.parentType_CompositeDataType.contains(newValue)
@@ -164,6 +169,7 @@ routine addParentTypeToCorrespondingCompositeTypeClass(pcm::CompositeDataType pc
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction CompositeDataTypeParentRemoved {
 	after element pcm::CompositeDataType removed from pcm::CompositeDataType[parentType_CompositeDataType]
 	with !affectedEObject.parentType_CompositeDataType.contains(oldValue)

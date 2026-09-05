@@ -137,7 +137,7 @@ routine removeAutoJavaConstructorIfNoUmlCorrespondence(java::Constructor jc) {
 
 routine createOrFindJavaClass(uml::Classifier umlClassifier) {
 	match {
-		require absence of java::Class corresponding to umlClassifier
+		require absence of java::ConcreteClassifier corresponding to umlClassifier
 		val javaPackage = retrieve optional java::Package corresponding to umlClassifier.eContainer
 	}
 	update {
@@ -476,7 +476,7 @@ reaction UmlDataTypeInsertedAsRecord {
 
 routine createJavaRecordClass(uml::Classifier umlClassifier) {
 	match {
-		require absence of java::Class corresponding to umlClassifier
+		require absence of java::ConcreteClassifier corresponding to umlClassifier
 	}
 	create {
 		val javaClassifier = new java::Class
@@ -501,8 +501,7 @@ reaction UmlClassInsertedAsInterface {
 
 routine createJavaInterfaceFromClass(uml::Class umlClass) {
 	match {
-		require absence of java::Interface corresponding to umlClass
-		require absence of java::Class corresponding to umlClass
+		require absence of java::ConcreteClassifier corresponding to umlClass
 	}
 	create {
 		val javaInterface = new java::Interface
@@ -526,8 +525,7 @@ reaction UmlClassInsertedAsEnum {
 
 routine createJavaEnumFromClass(uml::Class umlClass) {
 	match {
-		require absence of java::Enumeration corresponding to umlClass
-		require absence of java::Class corresponding to umlClass
+		require absence of java::ConcreteClassifier corresponding to umlClass
 	}
 	create {
 		val javaEnum = new java::Enumeration
@@ -554,7 +552,7 @@ reaction UmlInterfaceInserted {
 
 routine createOrFindJavaInterface(uml::Interface umlInterface) {
 	match {
-		require absence of java::Interface corresponding to umlInterface
+		require absence of java::ConcreteClassifier corresponding to umlInterface
 		val javaPackage = retrieve optional java::Package corresponding to umlInterface.eContainer
 	}
 	update {
@@ -580,7 +578,7 @@ routine createOrFindJavaInterfaceInPackage(uml::Interface umlInterface, java::Pa
 
 routine createJavaInterface(uml::Interface umlInterface) {
 	match {
-		require absence of java::Interface corresponding to umlInterface
+		require absence of java::ConcreteClassifier corresponding to umlInterface
 	}
 	create {
 		val javaInterface = new java::Interface
@@ -684,7 +682,7 @@ reaction UmlEnumInserted {
 
 routine createJavaEnum(uml::Enumeration uEnum) {
 	match {
-		require absence of java::Enumeration corresponding to uEnum
+		require absence of java::ConcreteClassifier corresponding to uEnum
 	}
 	create {
 		val jEnum = new java::Enumeration

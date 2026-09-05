@@ -15,6 +15,7 @@ reactions: umlInterfaceGeneralizationReactions
 in reaction to changes in uml
 execute actions in pcm
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceGeneralizationAdded {
 	after element uml::Generalization inserted in uml::Interface[generalization]
 	with affectedEObject.generalizations.contains(newValue) // validity check
@@ -36,6 +37,7 @@ routine addParentInterface(uml::Interface umlInterface, uml::Classifier umlNewPa
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction InterfaceGeneralizationRemoved {
 	after element uml::Generalization removed from uml::Interface[generalization]
 	with !affectedEObject.generalizations.contains(oldValue) // validity check
@@ -55,6 +57,7 @@ routine removeParentInterface(uml::Interface umlInterface, uml::Classifier umlOl
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction ParentInterfaceReplaced {
 	after element replaced at uml::Generalization[general]
 	with affectedEObject.specific instanceof Interface

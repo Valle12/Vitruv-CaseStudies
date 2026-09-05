@@ -22,6 +22,7 @@ reactions: pcmRepositoryComponentReactions
 in reaction to changes in pcm
 execute actions in uml
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryComponentInserted {
 	after element pcm::RepositoryComponent inserted in pcm::Repository[components__Repository]
 	with affectedEObject.components__Repository.contains(newValue)
@@ -192,6 +193,7 @@ routine moveCorrespondingComponentPackage(pcm::RepositoryComponent pcmComponent,
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryComponentRemoved {
 	after element pcm::RepositoryComponent removed from pcm::Repository[components__Repository]
 	with !affectedEObject.components__Repository.contains(oldValue)
@@ -210,6 +212,7 @@ routine removeCorrespondingComponentPackage(pcm::RepositoryComponent pcmComponen
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryComponentDeleted {
 	after element pcm::RepositoryComponent deleted
 	call deleteCorrespondingComponentPackage(affectedEObject)
@@ -233,6 +236,7 @@ routine deleteCorrespondingComponentPackage(pcm::RepositoryComponent pcmComponen
 	}
 }
 
+@feature(type = "PcmUmlClass")
 reaction RepositoryComponentNameChanged {
 	after attribute replaced at pcm::RepositoryComponent[entityName]
 	with affectedEObject.entityName == newValue

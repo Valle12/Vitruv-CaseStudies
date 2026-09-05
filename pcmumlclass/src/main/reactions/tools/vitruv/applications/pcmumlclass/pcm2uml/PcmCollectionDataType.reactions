@@ -27,6 +27,7 @@ reactions: pcmCollectionDataTypeReactions
 in reaction to changes in pcm
 execute actions in uml
 
+@feature(type = "PcmUmlClass")
 reaction CollectionDataTypeInnerTypeChanged {
 	after element replaced at pcm::CollectionDataType[innerType_CollectionDataType]
 	with affectedEObject.innerType_CollectionDataType == newValue

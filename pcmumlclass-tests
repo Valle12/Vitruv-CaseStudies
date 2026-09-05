@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# Runs the pcmumlclass test suite once and records the results under
+# pcmumlclass-tests-details/<label>*.log.
+#
+# Usage:
+#   ./pcmumlclass-tests <label> [reactions-dir]
+#
+#   label          names the log files (e.g. baseline, annotated, preprocessed)
+#   reactions-dir  optional; when given, the build compiles the reactions from
+#                  that directory via -Dpcmumlclass.reactions.dir instead of
+#                  pcmumlclass/src/main/reactions
+
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=vitruv-dsls-configs.sh
+. "$ROOT/vitruv-dsls-configs.sh"
+
+if [ "$#" -lt 1 ]; then
+  echo "Usage: ./pcmumlclass-tests <label> [reactions-dir]" >&2
+  exit 1
+fi
+
+LABEL="$1"
+REACTIONS="${2:-}"
+LOG_DIR="$ROOT/pcmumlclass-tests-details"
+LOG="$LOG_DIR/${LABEL}.log"
+CLASSES_LOG="$LOG_DIR/${LABEL}-classes.log"
+
+mkdir -p "$LOG_DIR"
+cd "$ROOT" || exit 1
+
+echo "[$LABEL] JAVA_HOME=${JAVA_HOME:-<unset>}"
+
+MVN_ARGS=(-pl pcmumlclass clean test)
+if [ -n "$REACTIONS" ]; then
+  if [ ! -d "$REACTIONS" ]; then
+    echo "[$LABEL] reactions dir $REACTIONS does not exist" >&2
+    exit 1
+  fi
+  MVN_ARGS+=(-Dpcmumlclass.reactions.dir="$(to_host_path "$REACTIONS")")
+  echo "[$LABEL] building pcmumlclass against $(to_host_path "$REACTIONS")"
+else
+  echo "[$LABEL] building pcmumlclass against src/main/reactions"
+fi
+
+echo "[$LABEL] setup: clean"
+if ! ./mvnw -q clean > "$LOG_DIR/${LABEL}-setup.log" 2>&1; then
+  echo "[$LABEL] clean FAILED (see ${LABEL}-setup.log)"
+  exit 1
+fi
+echo "[$LABEL] setup: install deps"
+if ! ./mvnw -q -pl util.temporary,testutility -am install -DskipTests \
+    >> "$LOG_DIR/${LABEL}-setup.log" 2>&1; then
+  echo "[$LABEL] install FAILED (see ${LABEL}-setup.log)"
+  exit 1
+fi
+
+echo "[$LABEL] running tests"
+./mvnw "${MVN_ARGS[@]}" > "$LOG" 2>&1
+rc=$?
+
+line=$(grep -E "Tests run:[[:space:]]*[0-9]+,[[:space:]]*Failures:[[:space:]]*[0-9]+,[[:space:]]*Errors:[[:space:]]*[0-9]+,[[:space:]]*Skipped:[[:space:]]*[0-9]+" "$LOG" | tail -1)
+if [ -n "$line" ]; then
+  run=$(sed -nE 's/.*Tests run:[[:space:]]*([0-9]+).*/\1/p'  <<<"$line")
+  fail=$(sed -nE 's/.*Failures:[[:space:]]*([0-9]+).*/\1/p'  <<<"$line")
+  err=$(sed -nE 's/.*Errors:[[:space:]]*([0-9]+).*/\1/p'     <<<"$line")
+  skip=$(sed -nE 's/.*Skipped:[[:space:]]*([0-9]+).*/\1/p'   <<<"$line")
+else
+  run=0; fail=0; err=0; skip=0
+fi
+
+if [ "$rc" -eq 0 ]; then
+  status="ok"
+elif [ -n "$line" ]; then
+  status="failed"
+else
+  status="build-error"
+fi
+
+echo "[$LABEL] rc=$rc status=$status tests=$run failures=$fail errors=$err skipped=$skip"
+
+echo
+echo "=== Per test class ==="
+grep -E "Tests run: .* -- in tools\.vitruv\.applications\.pcmumlclass" "$LOG" \
+  | sed 's/^\[INFO\] //' | tee "$CLASSES_LOG"
+
+if [ "$fail" -gt 0 ] || [ "$err" -gt 0 ]; then
+  echo
+  echo "=== Failing tests ==="
+  grep -E "^\[ERROR\]   [A-Za-z0-9_.]+\." "$LOG" | sed 's/^\[ERROR\]   /  /'
+fi
+
+exit "$rc"
